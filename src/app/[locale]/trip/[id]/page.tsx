@@ -8,7 +8,8 @@ import { Trip, formatPrice, formatDate } from '@/components/TripCatalog';
 import { Mountain, Calendar, Bus, Users, MapPin, ArrowLeft, ClipboardList, Map, X, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+import { API_URL } from '@/lib/api';
+
 
 export default function TripDetailPage() {
   const params = useParams();

@@ -24,7 +24,7 @@ export interface Trip {
   packages?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
+import { API_URL } from '@/lib/api';
 
 export function formatPrice(price: number) {
   return new Intl.NumberFormat('id-ID', {

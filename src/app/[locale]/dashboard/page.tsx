@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { LogOut, Map, CreditCard, ChevronRight, Upload, CheckCircle, Calendar, Bus, AlertCircle, Download, MapPin, User, FileText, Activity } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
+import { API_URL } from '@/lib/api';
+
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
