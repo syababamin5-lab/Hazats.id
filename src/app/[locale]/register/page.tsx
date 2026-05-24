@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({ name: '', contact: '', password: '' });
+  const [formData, setFormData] = useState({ name: '', contact: '', password: '', gender: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -64,6 +64,14 @@ export default function RegisterPage() {
             <div>
               <label htmlFor="contact" className="sr-only">Email / No. WA</label>
               <input id="contact" name="contact" type="text" required className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#D4AF37] focus:border-[#D4AF37] focus:z-10 sm:text-sm" placeholder="Email / Nomor WhatsApp" value={formData.contact} onChange={(e) => setFormData({...formData, contact: e.target.value})} />
+            </div>
+            <div>
+              <label htmlFor="gender" className="sr-only">Jenis Kelamin</label>
+              <select id="gender" name="gender" required className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 text-gray-900 focus:outline-none focus:ring-[#D4AF37] focus:border-[#D4AF37] focus:z-10 sm:text-sm" value={formData.gender} onChange={(e) => setFormData({...formData, gender: e.target.value})}>
+                <option value="" disabled>Pilih Jenis Kelamin</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
             </div>
             <div>
               <label htmlFor="password" className="sr-only">Password</label>
