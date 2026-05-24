@@ -757,7 +757,7 @@ function GuideTab({ token }: { token: string }) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold mb-1">Riwayat / Pengalaman</label>
+            <label className="block text-xs font-semibold mb-1">Daftar Gunung yang Pernah Didaki</label>
             <textarea value={form.history} onChange={e => setForm({...form, history: e.target.value})} className="w-full border rounded-xl px-4 py-2 text-sm h-24" />
           </div>
           <button disabled={saving} className="bg-black text-white px-6 py-2 rounded-xl text-sm font-medium disabled:opacity-50">
@@ -771,7 +771,7 @@ function GuideTab({ token }: { token: string }) {
           <thead className="bg-gray-50 border-b text-xs uppercase text-gray-500">
             <tr>
               <th className="p-4">Pemandu</th>
-              <th className="p-4">Riwayat</th>
+              <th className="p-4">Gunung yang Pernah Didaki</th>
               <th className="p-4 w-24 text-right">Aksi</th>
             </tr>
           </thead>

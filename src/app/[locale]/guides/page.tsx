@@ -59,9 +59,10 @@ export default async function GuidesPage() {
                     <div className="flex items-center gap-1.5 text-[#D4AF37] text-xs font-semibold uppercase tracking-wider mb-4">
                       <Map size={14} /> Official Guide
                     </div>
-                    <p className="text-sm text-gray-500 leading-relaxed">
+                    <div className="text-sm text-gray-500 leading-relaxed">
+                      <span className="block font-semibold text-gray-800 mb-1">Gunung yang Pernah Didaki:</span>
                       {g.history}
-                    </p>
+                    </div>
                   </div>
                 </div>
               ))}
