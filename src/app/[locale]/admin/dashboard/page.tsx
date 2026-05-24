@@ -84,7 +84,7 @@ function TripTab({ token }: { token: string }) {
     try {
       const prompt = `Buatkan deskripsi promosi trip pendakian untuk Gunung ${form.mountain_name} ${form.via ? 'via ' + form.via : ''}. \nDeskripsi harus informatif, tidak monoton, dan terstruktur.\nPastikan menyebutkan secara detail:\n1. Estimasi waktu tempuh perjalanan (berapa jam/hari).\n2. Terdapat berapa pos pendakian di jalur ini.\n3. Apa keistimewaan atau pemandangan spesial dari gunung ini.\nFormat dalam 2-3 paragraf panjang yang memikat hati pembaca agar mau mendaftar trip ini.\nGunakan bahasa Indonesia bergaya marketing modern. Jangan memotong kalimat di tengah jalan.`;
 
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
