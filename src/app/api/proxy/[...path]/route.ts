@@ -32,6 +32,7 @@ async function handler(req: NextRequest, context: { params: Promise<{ path: stri
       headers: { 'Content-Type': res.headers.get('Content-Type') || 'application/json' },
     });
   } catch (e: any) {
+    console.error('PROXY ERROR:', e);
     return NextResponse.json({ detail: 'Server tidak dapat dijangkau. Coba lagi.' }, { status: 503 });
   }
 }

@@ -201,8 +201,10 @@ function TripTab({ token }: { token: string }) {
         method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) {
-        const data = await res.json();
-        alert('❌ Gagal menghapus: ' + (data.detail || 'Terjadi kesalahan'));
+        const text = await res.text();
+        let errStr = text;
+        try { errStr = JSON.parse(text).detail || text; } catch {}
+        alert(`❌ Gagal menghapus (Status ${res.status}): ` + errStr);
         return;
       }
       fetchTrips();
