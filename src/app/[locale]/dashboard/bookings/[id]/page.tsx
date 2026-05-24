@@ -5,7 +5,7 @@ import { useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { ChevronLeft, Calendar, Bus, MapPin, CheckCircle, Upload, FileText, User, AlertCircle, Clock } from 'lucide-react';
-import { API_URL } from '@/lib/api';
+import { API_URL, BACKEND_URL } from '@/lib/api';
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
@@ -324,7 +324,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                     </div>
                   </div>
                   <a 
-                    href={`${API_URL.replace('/api/v1', '')}${booking.payment_proof_url}`} 
+                    href={`${BACKEND_URL}${booking.payment_proof_url}`} 
                     target="_blank" 
                     rel="noreferrer"
                     className="flex items-center justify-center gap-2 w-full border-2 border-gray-200 hover:border-black text-black font-semibold py-2.5 rounded-xl transition-colors text-sm"
