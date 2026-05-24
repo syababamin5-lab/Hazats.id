@@ -74,38 +74,26 @@ function TripTab({ token }: { token: string }) {
 
   const handleGenerateDescription = async () => {
     if (!form.mountain_name) return;
-    const apiKey = localStorage.getItem('gemini_api_key')?.trim();
-    if (!apiKey) {
-      alert("Silakan masukkan Google Gemini API Key di tab Konfigurasi terlebih dahulu.");
-      return;
-    }
-
     setGeneratingDesc(true);
     try {
-      const prompt = `Buatkan deskripsi promosi trip pendakian untuk Gunung ${form.mountain_name} ${form.via ? 'via ' + form.via : ''}. \nDeskripsi harus informatif, tidak monoton, dan terstruktur.\nPastikan menyebutkan secara detail:\n1. Estimasi waktu tempuh perjalanan (berapa jam/hari).\n2. Terdapat berapa pos pendakian di jalur ini.\n3. Apa keistimewaan atau pemandangan spesial dari gunung ini.\nFormat dalam 2-3 paragraf panjang yang memikat hati pembaca agar mau mendaftar trip ini.\nGunakan bahasa Indonesia bergaya marketing modern. Jangan memotong kalimat di tengah jalan.`;
-
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      const res = await fetch(`${API_URL}/generate-description`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
+        body: JSON.stringify({ mountain_name: form.mountain_name, via: form.via || null })
       });
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData?.error?.message || "Gagal atau kuota habis");
+        throw new Error(errorData?.detail || 'Server AI sedang tidak tersedia.');
       }
       const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (text) {
-        setForm({ ...form, description: text.trim() });
+      if (data.description) {
+        setForm({ ...form, description: data.description });
       } else {
-        alert("Gagal memformulasikan kalimat. Coba lagi.");
+        alert('Gagal memformulasikan kalimat. Coba lagi.');
       }
     } catch (err: any) {
-      alert("Gagal memproses AI: " + err.message + "\nPastikan API Key Anda benar dan tidak ada spasi tambahan.");
+      alert('Gagal Generate AI: ' + err.message);
     } finally {
       setGeneratingDesc(false);
     }
