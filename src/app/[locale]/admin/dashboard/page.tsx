@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   LogOut, Mountain, Users, BookOpen, Image as ImageIcon,
   Plus, Edit2, Trash2, Check, X, Eye, Upload, ChevronDown,
-  RefreshCw, AlertCircle, Settings
+  RefreshCw, AlertCircle, Settings, UserCheck
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
@@ -707,6 +707,100 @@ function ConfigTab({ token }: { token: string }) {
   );
 }
 
+// ─── Tab: Kelola Pemandu ──────────────────────────────────────────────
+function GuideTab({ token }: { token: string }) {
+  const [guides, setGuides] = useState<{id: number, name: string, photo_url: string, history: string}[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ name: '', photo_url: '', history: '' });
+  const [saving, setSaving] = useState(false);
+
+  const fetchGuides = () => {
+    setLoading(true);
+    fetch(`${API_URL}/guides`).then(r => r.json()).then(setGuides).catch(() => setGuides([])).finally(() => setLoading(false));
+  };
+  useEffect(() => { fetchGuides(); }, []);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    await fetch(`${API_URL}/guides`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(form)
+    });
+    setForm({ name: '', photo_url: '', history: '' });
+    fetchGuides();
+    setSaving(false);
+  };
+
+  const handleDelete = async (id: number) => {
+    if(!confirm('Hapus pemandu ini?')) return;
+    await fetch(`${API_URL}/guides/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    fetchGuides();
+  };
+
+  if (loading) return <div className="p-8 text-center text-gray-500">Memuat Pemandu...</div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-2xl border border-gray-100">
+        <h2 className="font-bold text-lg mb-4">Tambah Pemandu</h2>
+        <form onSubmit={handleAdd} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold mb-1">Nama Pemandu</label>
+              <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required className="w-full border rounded-xl px-4 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1">URL Foto (Opsional)</label>
+              <input type="text" value={form.photo_url} onChange={e => setForm({...form, photo_url: e.target.value})} className="w-full border rounded-xl px-4 py-2 text-sm" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1">Riwayat / Pengalaman</label>
+            <textarea value={form.history} onChange={e => setForm({...form, history: e.target.value})} className="w-full border rounded-xl px-4 py-2 text-sm h-24" />
+          </div>
+          <button disabled={saving} className="bg-black text-white px-6 py-2 rounded-xl text-sm font-medium disabled:opacity-50">
+            {saving ? 'Menyimpan...' : 'Tambah Pemandu'}
+          </button>
+        </form>
+      </div>
+      
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <table className="w-full text-left">
+          <thead className="bg-gray-50 border-b text-xs uppercase text-gray-500">
+            <tr>
+              <th className="p-4">Pemandu</th>
+              <th className="p-4">Riwayat</th>
+              <th className="p-4 w-24 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {guides.map(g => (
+              <tr key={g.id}>
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 bg-cover bg-center" style={{ backgroundImage: `url(${g.photo_url || 'https://via.placeholder.com/150'})` }} />
+                    <span className="font-medium text-sm">{g.name}</span>
+                  </div>
+                </td>
+                <td className="p-4 text-xs text-gray-500 max-w-xs truncate">
+                  {g.history}
+                </td>
+                <td className="p-4 text-right">
+                  <button onClick={() => handleDelete(g.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                    <Trash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Admin Dashboard ────────────────────────────────────────────────
 export default function AdminDashboard() {
   const router = useRouter();
@@ -743,6 +837,7 @@ export default function AdminDashboard() {
     { id: 'members', label: 'Database Anggota', icon: Users },
     { id: 'gallery', label: 'Galeri Foto', icon: ImageIcon },
     { id: 'config', label: 'Konfigurasi', icon: Settings },
+    { id: 'guides', label: 'Pemandu', icon: UserCheck },
   ];
 
   return (
@@ -800,6 +895,7 @@ export default function AdminDashboard() {
         {activeTab === 'members' && <MemberTab token={token} />}
         {activeTab === 'gallery' && <GalleryTab token={token} />}
         {activeTab === 'config' && <ConfigTab token={token} />}
+        {activeTab === 'guides' && <GuideTab token={token} />}
       </main>
     </div>
   );
