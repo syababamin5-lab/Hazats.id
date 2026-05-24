@@ -356,69 +356,49 @@ export default function DashboardPage() {
                 ) : (
                   <div className="divide-y divide-gray-100">
                     {displayBookings.map(booking => (
-                      <div key={booking.id} className="p-5 flex gap-4 items-start hover:bg-gray-50/50 transition-colors">
-                        <div
-                          className="w-20 h-20 rounded-xl bg-cover bg-center flex-shrink-0 shadow-sm"
-                          style={{ backgroundImage: `url(${booking.trip.image_url || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=400'})` }}
-                        />
+                      <Link href={`/dashboard/bookings/${booking.id}`} key={booking.id} className="block hover:bg-gray-50/50 transition-colors p-5 border-b border-gray-100 last:border-b-0 cursor-pointer">
+                        <div className="flex gap-4 items-start">
+                          <div
+                            className="w-20 h-20 rounded-xl bg-cover bg-center flex-shrink-0 shadow-sm"
+                            style={{ backgroundImage: `url(${booking.trip.image_url || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=400'})` }}
+                          />
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-1">
-                            <h3 className="font-heading font-bold text-base truncate">
-                              {booking.trip.mountain_name}
-                            </h3>
-                            <StatusBadge status={booking.status} />
-                          </div>
-
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-0.5">
-                            <Calendar size={11} />
-                            {formatDate(booking.trip.departure_date)}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
-                            <Bus size={11} />
-                            {booking.trip.transport}
-                          </div>
-                          {booking.meeting_point && (
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
-                              <MapPin size={11} />
-                              {booking.meeting_point}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <h3 className="font-heading font-bold text-base truncate">
+                                {booking.trip.mountain_name}
+                              </h3>
+                              <StatusBadge status={booking.status} />
                             </div>
-                          )}
 
-                          <div className="flex items-center gap-2 flex-wrap mt-2">
-                            <span className="font-bold text-[#D4AF37] text-sm mr-2">
-                              {formatPrice(booking.trip.price)}
-                            </span>
-
-                            {booking.status === 'pending' && !booking.payment_proof_url && uploadDoneId !== booking.id && (
-                              <>
-                                <input
-                                  type="file" accept="image/*" className="hidden"
-                                  ref={el => { fileInputRefs.current[booking.id] = el; }}
-                                  onChange={e => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleUploadProof(booking.id, file);
-                                  }}
-                                />
-                                <button
-                                  onClick={() => fileInputRefs.current[booking.id]?.click()}
-                                  disabled={uploadingId === booking.id}
-                                  className="flex items-center gap-1.5 text-xs bg-black hover:bg-[#D4AF37] text-white px-4 py-1.5 rounded-full transition-all font-medium disabled:opacity-50"
-                                >
-                                  <Upload size={12} />
-                                  {uploadingId === booking.id ? 'Uploading...' : t('upload_proof')}
-                                </button>
-                              </>
-                            )}
-
-                            {(booking.payment_proof_url || uploadDoneId === booking.id) && booking.status === 'pending' && (
-                              <div className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full font-medium">
-                                <CheckCircle size={12} /> Bukti sudah dikirim
+                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-0.5">
+                              <Calendar size={11} />
+                              {formatDate(booking.trip.departure_date)}
+                            </div>
+                            {booking.trip.transport && (
+                              <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                                <Bus size={11} />
+                                {booking.trip.transport}
                               </div>
                             )}
+                            {booking.meeting_point && (
+                              <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
+                                <MapPin size={11} />
+                                {booking.meeting_point}
+                              </div>
+                            )}
+
+                            <div className="flex items-center justify-between gap-2 flex-wrap mt-2">
+                              <span className="font-bold text-[#D4AF37] text-sm">
+                                {formatPrice(booking.trip.price)}
+                              </span>
+                              <span className="text-xs text-blue-600 font-semibold flex items-center gap-1 hover:underline">
+                                Lihat Rincian <ChevronRight size={14} />
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}
