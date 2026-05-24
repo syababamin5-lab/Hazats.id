@@ -1,0 +1,22 @@
+{
+  "Index": {
+    "title": "Conquer the Heights, Zero Hassle",
+    "description": "Premium Open Trip & Mountain Guiding in West Java",
+    "cta": "See Trip Schedule",
+    "login": "Login / Sign Up"
+  },
+  "Services": {
+    "guide": "Professional Guide",
+    "tent": "Premium Tents",
+    "cooking": "Cooking Gear",
+    "transport": "Local Transport (Kab. Bandung)"
+  },
+  "Trips": {
+    "title": "Active Open Trip Schedule",
+    "difficulty": "Difficulty",
+    "quota": "Quota Available",
+    "date": "Departure Date",
+    "transport": "Transport Info",
+    "book": "Book Now"
+  }
+}

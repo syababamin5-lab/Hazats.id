@@ -1,0 +1,22 @@
+{
+  "Index": {
+    "title": "Taklukkan Puncak Tanpa Repot",
+    "description": "Premium Open Trip & Guiding Gunung di Jawa Barat",
+    "cta": "Lihat Jadwal Trip",
+    "login": "Masuk / Daftar"
+  },
+  "Services": {
+    "guide": "Guide Profesional",
+    "tent": "Tenda Premium",
+    "cooking": "Alat Masak",
+    "transport": "Transportasi Lokal (Kab. Bandung)"
+  },
+  "Trips": {
+    "title": "Jadwal Open Trip Aktif",
+    "difficulty": "Tingkat Kesulitan",
+    "quota": "Sisa Kuota",
+    "date": "Tanggal Keberangkatan",
+    "transport": "Info Transportasi",
+    "book": "Pesan Sekarang"
+  }
+}
