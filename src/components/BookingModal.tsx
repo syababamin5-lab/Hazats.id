@@ -61,7 +61,11 @@ export default function BookingModal({ trip, selectedPackage, currentPrice, onCl
       setBookingId(data.id);
       setStep('success');
     } catch (err: any) {
-      setError(err.message);
+      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+        setError('Koneksi ke server gagal. Pastikan internet Anda stabil dan coba lagi dalam beberapa detik.');
+      } else {
+        setError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
+      }
     } finally {
       setLoading(false);
     }
