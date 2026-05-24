@@ -105,9 +105,14 @@ function TripTab({ token }: { token: string }) {
       .then(r => r.json()).then(setTrips).catch(() => setTrips([]))
       .finally(() => setLoading(false));
   };
+  const [galleryLoading, setGalleryLoading] = useState(false);
   const fetchGallery = () => {
+    setGalleryLoading(true);
     fetch(`${API_URL}/gallery`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(data => setGallery(Array.isArray(data) ? data : [])).catch(() => { });
+      .then(r => r.json())
+      .then(data => setGallery(Array.isArray(data) ? data : []))
+      .catch(() => setGallery([]))
+      .finally(() => setGalleryLoading(false));
   };
   const fetchOptions = () => {
     fetch(`${API_URL}/admin/config/transports`, { headers: { Authorization: `Bearer ${token}` } })
@@ -353,7 +358,7 @@ function TripTab({ token }: { token: string }) {
                   <div className="flex gap-2">
                     <input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })}
                       className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="https://... atau pilih dari galeri" />
-                    <button type="button" onClick={() => setShowGalleryPicker(true)}
+                    <button type="button" onClick={() => { fetchGallery(); setShowGalleryPicker(true); }}
                       className="flex items-center gap-1.5 border border-gray-200 hover:border-black px-3 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap">
                       <ImageIcon size={14} /> Galeri
                     </button>
@@ -384,25 +389,41 @@ function TripTab({ token }: { token: string }) {
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
               <h3 className="font-heading font-bold text-lg">Pilih Foto dari Galeri</h3>
-              <button onClick={() => setShowGalleryPicker(false)} className="text-gray-400 hover:text-black"><X size={20} /></button>
+              <div className="flex items-center gap-2">
+                <button onClick={fetchGallery} className="text-gray-400 hover:text-black p-1 rounded-lg hover:bg-gray-100 transition-colors" title="Refresh galeri">
+                  <RefreshCw size={16} className={galleryLoading ? 'animate-spin' : ''} />
+                </button>
+                <button onClick={() => setShowGalleryPicker(false)} className="text-gray-400 hover:text-black"><X size={20} /></button>
+              </div>
             </div>
             <div className="p-4">
-              {gallery.length === 0 ? (
-                <div className="text-center py-10 text-gray-400 text-sm">Belum ada foto di galeri. Upload dulu di tab Galeri.</div>
+              {galleryLoading ? (
+                <div className="grid grid-cols-3 gap-3">
+                  {[1,2,3,4,5,6].map(i => <div key={i} className="aspect-square rounded-xl bg-gray-100 animate-pulse" />)}
+                </div>
+              ) : gallery.length === 0 ? (
+                <div className="text-center py-10">
+                  <ImageIcon size={40} className="text-gray-200 mx-auto mb-3" />
+                  <p className="text-gray-500 text-sm font-medium">Belum ada foto di galeri</p>
+                  <p className="text-gray-400 text-xs mt-1">Upload dulu di tab Galeri, lalu klik refresh di atas.</p>
+                </div>
               ) : (
                 <div className="grid grid-cols-3 gap-3">
-                  {gallery.map(img => (
-                    <button key={img.id} onClick={() => { setForm({ ...form, image_url: `${API_URL}${img.url}` }); setShowGalleryPicker(false); }}
-                      className="relative group aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-[#D4AF37] transition-all">
-                      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${API_URL}${img.url})` }} />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                        <Check className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
-                      </div>
-                      {img.description && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1.5 truncate">{img.description}</div>
-                      )}
-                    </button>
-                  ))}
+                  {gallery.map(img => {
+                    const imgUrl = img.url?.startsWith('http') ? img.url : `${API_URL}${img.url}`;
+                    return (
+                      <button key={img.id} onClick={() => { setForm({ ...form, image_url: imgUrl }); setShowGalleryPicker(false); }}
+                        className="relative group aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-[#D4AF37] transition-all">
+                        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${imgUrl})` }} />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                          <Check className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+                        </div>
+                        {img.description && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1.5 truncate">{img.description}</div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
