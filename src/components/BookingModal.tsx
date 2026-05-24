@@ -98,7 +98,7 @@ export default function BookingModal({ trip, onClose, formatPrice, formatDate }:
             <p className="text-xs text-gray-400 uppercase tracking-widest mb-0.5">
               {step === 'confirm' ? t('confirm_title') : t('success_title')}
             </p>
-            <h3 className="font-heading font-bold text-xl">{trip.mountain_name}</h3>
+            <h3 className="font-heading font-bold text-xl">{trip.mountain_name} {trip.via && <span className="text-gray-400 font-normal text-lg">via {trip.via}</span>}</h3>
           </div>
           <button
             onClick={onClose}

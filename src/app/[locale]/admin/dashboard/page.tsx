@@ -64,7 +64,7 @@ function TripTab({ token }: { token: string }) {
   const [transports, setTransports] = useState<{ id: number, name: string }[]>([]);
   const [meetingPoints, setMeetingPoints] = useState<{ id: number, name: string }[]>([]);
   const [form, setForm] = useState({
-    mountain_name: '', description: '', difficulty: 'Pemula', departure_date: '',
+    mountain_name: '', via: '', description: '', difficulty: 'Pemula', departure_date: '',
     return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: ''
   });
   const [saving, setSaving] = useState(false);
@@ -112,14 +112,14 @@ function TripTab({ token }: { token: string }) {
 
   const openCreate = () => {
     setEditTrip(null);
-    setForm({ mountain_name: '', description: '', difficulty: 'Pemula', departure_date: '', return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '' });
+    setForm({ mountain_name: '', via: '', description: '', difficulty: 'Pemula', departure_date: '', return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '' });
     setError('');
     setShowForm(true);
   };
   const openEdit = (trip: Trip) => {
     setEditTrip(trip);
     setForm({
-      mountain_name: trip.mountain_name, description: trip.description || '',
+      mountain_name: trip.mountain_name, via: trip.via || '', description: trip.description || '',
       difficulty: trip.difficulty, departure_date: trip.departure_date, return_date: trip.return_date || '',
       max_quota: trip.max_quota, transport: trip.transport || '', price: trip.price,
       meeting_point: trip.meeting_point || '', image_url: trip.image_url || ''
@@ -170,7 +170,7 @@ function TripTab({ token }: { token: string }) {
                 style={{ backgroundImage: `url(${trip.image_url || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=200'})` }} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <h4 className="font-bold text-sm truncate">{trip.mountain_name}</h4>
+                  <h4 className="font-bold text-sm truncate">{trip.mountain_name} {trip.via ? <span className="font-normal text-gray-500">via {trip.via}</span> : ''}</h4>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${trip.difficulty === 'Pemula' ? 'bg-emerald-50 text-emerald-600' : trip.difficulty === 'Menengah' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'}`}>
                     {trip.difficulty}
                   </span>
@@ -204,10 +204,17 @@ function TripTab({ token }: { token: string }) {
               {error && <div className="flex items-center gap-2 bg-red-50 text-red-600 p-3 rounded-xl text-sm"><AlertCircle size={16} />{error}</div>}
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Nama Gunung *</label>
-                  <input value={form.mountain_name} onChange={e => setForm({ ...form, mountain_name: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="contoh: Gunung Papandayan" />
+                <div className="grid grid-cols-2 gap-4 col-span-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Nama Gunung *</label>
+                    <input value={form.mountain_name} onChange={e => setForm({ ...form, mountain_name: e.target.value })}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="contoh: Gunung Papandayan" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Via (Opsional)</label>
+                    <input value={form.via || ''} onChange={e => setForm({ ...form, via: e.target.value })}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="contoh: Cibodas" />
+                  </div>
                 </div>
                 <div className="col-span-2">
                   <div className="flex items-center justify-between mb-1.5">

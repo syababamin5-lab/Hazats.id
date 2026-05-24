@@ -8,6 +8,7 @@ import BookingModal from './BookingModal';
 export interface Trip {
   id: number;
   mountain_name: string;
+  via?: string;
   description: string;
   difficulty: string;
   departure_date: string;
@@ -127,7 +128,7 @@ export default function TripCatalog() {
                   {/* Card Content */}
                   <div className="p-6 flex flex-col flex-1">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-heading text-xl font-bold leading-tight">{trip.mountain_name}</h3>
+                      <h3 className="font-heading text-xl font-bold leading-tight">{trip.mountain_name} {trip.via && <span className="text-base font-normal text-gray-500">via {trip.via}</span>}</h3>
                       <span className="font-bold text-[#D4AF37] text-base whitespace-nowrap ml-3">
                         {formatPrice(trip.price)}
                       </span>
