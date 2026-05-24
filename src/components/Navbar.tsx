@@ -61,13 +61,13 @@ export default function Navbar() {
             {mounted && isLoggedIn ? (
               <>
                 <Link href="/dashboard" className="hidden sm:flex items-center space-x-2 bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-full font-medium transition-colors">
-                  <LayoutDashboard size={18} />
-                  <span>Dashboard</span>
+                  <User size={18} />
+                  <span>{t('account')}</span>
                 </Link>
                 
                 {/* Mobile Dashboard Button */}
                 <Link href="/dashboard" className="sm:hidden flex items-center justify-center bg-black hover:bg-gray-800 text-white w-10 h-10 rounded-full transition-colors">
-                  <LayoutDashboard size={18} />
+                  <User size={18} />
                 </Link>
               </>
             ) : mounted && !isLoggedIn ? (
