@@ -21,6 +21,7 @@ export interface Trip {
   meeting_point: string;
   image_url: string;
   is_active: boolean;
+  packages?: string;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;

@@ -13,9 +13,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_AP
 
 // ─── Types ──────────────────────────────────────────────────────────────
 interface Trip {
-  id: number; mountain_name: string; via?: string; description: string; trip_type?: string; difficulty: string;
-  departure_date: string; return_date: string; max_quota: number; remaining_quota: number;
-  transport: string; price: number; meeting_point: string; image_url: string; is_active: boolean;
+  id: number; mountain_name: string; via: string; description: string; trip_type: string;
+  difficulty: string; departure_date: string; return_date: string; max_quota: number;
+  remaining_quota: number; transport: string; price: number; meeting_point: string; image_url: string; packages?: string; is_active: boolean;
 }
 interface BookingUser { name: string; pendaki_id: string; email: string; phone: string; }
 interface BookingTrip { id: number; mountain_name: string; departure_date: string; price: number; }
