@@ -67,7 +67,7 @@ function TripTab({ token }: { token: string }) {
   const [form, setForm] = useState({
     mountain_name: '', via: '', description: '', trip_type: '', difficulty: 'Pemula', departure_date: '',
     return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '',
-    paketA: '', paketB: '', mepoBC: ''
+    paketA: '', paketB: '', mepoBC: '', isPackage: false, hasTransport: false
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -126,7 +126,7 @@ function TripTab({ token }: { token: string }) {
 
   const openCreate = () => {
     setEditTrip(null);
-    setForm({ mountain_name: '', via: '', description: '', trip_type: '', difficulty: 'Pemula', departure_date: '', return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '', paketA: '', paketB: '', mepoBC: '', isPackage: false });
+    setForm({ mountain_name: '', via: '', description: '', trip_type: '', difficulty: 'Pemula', departure_date: '', return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '', paketA: '', paketB: '', mepoBC: '', isPackage: false, hasTransport: false });
     setError('');
     setShowForm(true);
   };
@@ -150,7 +150,7 @@ function TripTab({ token }: { token: string }) {
       difficulty: trip.difficulty, departure_date: trip.departure_date, return_date: trip.return_date || '',
       max_quota: trip.max_quota, transport: trip.transport || '', price: trip.price,
       meeting_point: trip.meeting_point || '', image_url: trip.image_url || '',
-      paketA: pA, paketB: pB, mepoBC: mBC, isPackage: hasPackages
+      paketA: pA, paketB: pB, mepoBC: mBC, isPackage: hasPackages, hasTransport: !!trip.transport
     });
     setError('');
     setShowForm(true);
@@ -171,7 +171,8 @@ function TripTab({ token }: { token: string }) {
       }
 
       const payload: any = { ...form, price: lowestPrice, max_quota: Number(form.max_quota), packages: pkgs.length > 0 ? JSON.stringify(pkgs) : null };
-      delete payload.paketA; delete payload.paketB; delete payload.mepoBC; delete payload.isPackage;
+      if (!form.hasTransport) payload.transport = null;
+      delete payload.paketA; delete payload.paketB; delete payload.mepoBC; delete payload.isPackage; delete payload.hasTransport;
 
       const url = editTrip ? `${API_URL}/trips/${editTrip.id}` : `${API_URL}/trips`;
       const method = editTrip ? 'PUT' : 'POST';
@@ -342,7 +343,7 @@ function TripTab({ token }: { token: string }) {
                   {!form.isPackage ? (
                     <div>
                       <label className="block text-xs font-semibold text-gray-500 mb-1.5">Harga Trip (Rp)</label>
-                      <input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })}
+                      <input type="number" value={form.price} onChange={e => setForm({ ...form, price: Number(e.target.value) })}
                         className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Contoh: 750000" />
                     </div>
                   ) : (
@@ -368,13 +369,30 @@ function TripTab({ token }: { token: string }) {
                     </div>
                   )}
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Transportasi</label>
-                  <select value={form.transport} onChange={e => setForm({ ...form, transport: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white">
-                    <option value="">Pilih Transportasi...</option>
-                    {transports.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-                  </select>
+                <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                    <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Pengaturan Transportasi</label>
+                    <div className="flex items-center bg-gray-100 p-1 rounded-xl w-fit">
+                      <button type="button" onClick={() => setForm({ ...form, hasTransport: true })}
+                        className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${form.hasTransport ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}>
+                        Dengan Transport
+                      </button>
+                      <button type="button" onClick={() => setForm({ ...form, hasTransport: false, transport: '' })}
+                        className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${!form.hasTransport ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}>
+                        Tanpa Transport
+                      </button>
+                    </div>
+                  </div>
+                  {form.hasTransport && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Pilih Transportasi</label>
+                      <select value={form.transport} onChange={e => setForm({ ...form, transport: e.target.value })}
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white">
+                        <option value="">Pilih Transportasi...</option>
+                        {transports.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                      </select>
+                    </div>
+                  )}
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Titik Kumpul</label>
