@@ -73,21 +73,35 @@ function TripTab({ token }: { token: string }) {
 
   const handleGenerateDescription = async () => {
     if (!form.mountain_name) return;
+    const apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+      alert("Silakan masukkan Google Gemini API Key di tab Konfigurasi terlebih dahulu.");
+      return;
+    }
+
     setGeneratingDesc(true);
     try {
-      const res = await fetch(`https://id.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(form.mountain_name)}&format=json&origin=*`);
+      const prompt = `Buatkan deskripsi promosi trip pendakian untuk Gunung ${form.mountain_name} ${form.via ? 'via ' + form.via : ''}. \nDeskripsi harus informatif, tidak monoton, dan terstruktur.\nPastikan menyebutkan secara detail:\n1. Estimasi waktu tempuh perjalanan (berapa jam/hari).\n2. Terdapat berapa pos pendakian di jalur ini.\n3. Apa keistimewaan atau pemandangan spesial dari gunung ini.\nFormat dalam 2-3 paragraf panjang yang memikat hati pembaca agar mau mendaftar trip ini.\nGunakan bahasa Indonesia bergaya marketing modern. Jangan memotong kalimat di tengah jalan.`;
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+
+      if (!res.ok) throw new Error("Gagal atau kuota habis");
       const data = await res.json();
-      const pages = data.query.pages;
-      const pageId = Object.keys(pages)[0];
-      if (pageId !== '-1' && pages[pageId].extract) {
-        const extract = pages[pageId].extract.split('.').slice(0, 3).join('.') + '.';
-        const promoText = `✨ Siapkan diri Anda untuk sebuah petualangan tak terlupakan di ${form.mountain_name}!\n\n${extract}\n\nJadikan liburan Anda lebih bermakna dengan pemandangan epik, udara segar, dan pengalaman seru bersama kami. Daftar sekarang sebelum kehabisan kuota!`;
-        setForm({ ...form, description: promoText });
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (text) {
+        setForm({ ...form, description: text.trim() });
       } else {
-        alert("Referensi tidak ditemukan. Silakan isi manual.");
+        alert("Gagal memformulasikan kalimat. Coba lagi.");
       }
     } catch (err) {
-      alert("Gagal memproses AI generator.");
+      alert("Gagal memproses AI generator. Pastikan API Key Anda benar.");
     } finally {
       setGeneratingDesc(false);
     }
@@ -655,6 +669,16 @@ function ConfigTab({ token }: { token: string }) {
   
   const [newTransport, setNewTransport] = useState('');
   const [newMeetingPoint, setNewMeetingPoint] = useState('');
+
+  const [apiKey, setApiKey] = useState('');
+  useEffect(() => {
+    const key = localStorage.getItem('gemini_api_key');
+    if (key) setApiKey(key);
+  }, []);
+  const saveKey = () => {
+    localStorage.setItem('gemini_api_key', apiKey);
+    alert('API Key Gemini berhasil disimpan di browser!');
+  };
   
   const fetchData = async () => {
     setLoading(true);
@@ -716,6 +740,31 @@ function ConfigTab({ token }: { token: string }) {
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-heading font-bold text-xl">Pengaturan Konfigurasi Dropdown</h3>
       </div>
+      
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+        <h4 className="font-heading font-bold text-lg mb-2 flex items-center gap-2">
+           Integrasi Google Gemini AI
+        </h4>
+        <p className="text-sm text-gray-500 mb-4">
+          Masukkan API Key Gemini Anda agar fitur "Generate AI" dapat menyusun deskripsi cerdas secara otomatis. Dapatkan kunci gratis di <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" className="text-blue-500 underline font-medium">Google AI Studio</a>. Kunci disimpan aman di peramban ini.
+        </p>
+        <div className="flex gap-3 max-w-lg">
+          <input 
+            type="password" 
+            value={apiKey} 
+            onChange={(e) => setApiKey(e.target.value)} 
+            placeholder="AIzaSy***" 
+            className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37] text-sm" 
+          />
+          <button 
+            onClick={saveKey} 
+            className="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#D4AF37] transition-colors"
+          >
+            Simpan Key
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h4 className="font-heading font-bold text-lg mb-4">Opsi Transportasi</h4>
