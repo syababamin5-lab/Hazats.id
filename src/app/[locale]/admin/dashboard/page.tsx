@@ -586,8 +586,9 @@ function GalleryTab({ token }: { token: string }) {
   };
 
   const copyUrl = (url: string) => {
-    navigator.clipboard.writeText(`${API_URL}${url}`);
-    alert('URL disalin!');
+    // url sudah berupa data:base64 — tidak perlu tambahkan API_URL
+    navigator.clipboard.writeText(url);
+    alert('URL gambar disalin!');
   };
 
   return (
@@ -619,7 +620,7 @@ function GalleryTab({ token }: { token: string }) {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {images.map(img => (
             <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${API_URL}${img.url})` }} />
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${img.url})` }} />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                 <button onClick={() => copyUrl(img.url)}
                   className="text-xs bg-white text-black px-3 py-1.5 rounded-full font-medium hover:bg-[#D4AF37] hover:text-white transition-colors">
