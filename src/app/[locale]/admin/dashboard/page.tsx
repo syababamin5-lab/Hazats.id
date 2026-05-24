@@ -13,7 +13,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_AP
 
 // ─── Types ──────────────────────────────────────────────────────────────
 interface Trip {
-  id: number; mountain_name: string; description: string; difficulty: string;
+  id: number; mountain_name: string; via?: string; description: string; difficulty: string;
   departure_date: string; return_date: string; max_quota: number; remaining_quota: number;
   transport: string; price: number; meeting_point: string; image_url: string; is_active: boolean;
 }
