@@ -493,8 +493,8 @@ function MemberTab({ token }: { token: string }) {
   }, []);
 
   const filtered = members.filter(m =>
-    m.name.toLowerCase().includes(search.toLowerCase()) ||
-    m.pendaki_id.toLowerCase().includes(search.toLowerCase()) ||
+    (m.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (m.pendaki_id || '').toLowerCase().includes(search.toLowerCase()) ||
     (m.email || '').toLowerCase().includes(search.toLowerCase()) ||
     (m.phone || '').includes(search)
   );
