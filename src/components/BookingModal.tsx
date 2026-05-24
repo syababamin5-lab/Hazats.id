@@ -8,6 +8,8 @@ import { Trip } from './TripCatalog';
 
 interface BookingModalProps {
   trip: Trip;
+  selectedPackage?: string;
+  currentPrice?: number;
   onClose: () => void;
   formatPrice: (price: number) => string;
   formatDate: (date: string) => string;
@@ -15,7 +17,7 @@ interface BookingModalProps {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
 
-export default function BookingModal({ trip, onClose, formatPrice, formatDate }: BookingModalProps) {
+export default function BookingModal({ trip, selectedPackage, currentPrice, onClose, formatPrice, formatDate }: BookingModalProps) {
   const t = useTranslations('Booking');
   const router = useRouter();
   const [step, setStep] = useState<'confirm' | 'success'>('confirm');
@@ -27,12 +29,8 @@ export default function BookingModal({ trip, onClose, formatPrice, formatDate }:
   const fileRef = useRef<HTMLInputElement>(null);
   const points = trip.meeting_point ? trip.meeting_point.split('|').filter(p => p.trim() !== '') : [];
   const [selectedPoint, setSelectedPoint] = useState(points.length === 1 ? points[0] : '');
-  let pkgs: any[] = [];
-  try {
-    if (trip.packages) pkgs = JSON.parse(trip.packages);
-  } catch (e) {}
-  const [selectedPackage, setSelectedPackage] = useState(pkgs.length > 0 ? pkgs[0].name : '');
-  const currentPrice = pkgs.length > 0 ? (pkgs.find(p => p.name === selectedPackage)?.price || trip.price) : trip.price;
+
+  const finalPrice = currentPrice || trip.price;
 
   const handleBook = async () => {
     if (points.length > 0 && !selectedPoint) {
@@ -48,7 +46,7 @@ export default function BookingModal({ trip, onClose, formatPrice, formatDate }:
     setLoading(true);
     setError('');
     try {
-      const packageParam = selectedPackage ? `&package_name=${encodeURIComponent(selectedPackage)}&price_paid=${currentPrice}` : '';
+      const packageParam = selectedPackage ? `&package_name=${encodeURIComponent(selectedPackage)}&price_paid=${finalPrice}` : '';
       const res = await fetch(`${API_URL}/bookings?trip_id=${trip.id}${selectedPoint ? `&meeting_point=${encodeURIComponent(selectedPoint)}` : ''}${packageParam}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
@@ -155,25 +153,9 @@ export default function BookingModal({ trip, onClose, formatPrice, formatDate }:
                   </div>
                 )}
 
-                {pkgs.length > 0 && (
-                  <div className="mb-4 mt-2">
-                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">
-                      Pilihan Paket
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {pkgs.map((p: any) => (
-                        <label key={p.name} className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-colors ${selectedPackage === p.name ? 'border-[#D4AF37] bg-yellow-50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                          <input type="radio" name="package" className="hidden" checked={selectedPackage === p.name} onChange={() => setSelectedPackage(p.name)} />
-                          <span className="font-bold text-sm">{p.name}</span>
-                          <span className="text-xs text-gray-500">{formatPrice(p.price)}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
                 <div className="border-t border-gray-100 pt-4 flex justify-between items-center">
                   <span className="text-gray-600 font-medium">{t('price')}</span>
-                  <span className="font-bold text-2xl text-[#D4AF37]">{formatPrice(currentPrice)}</span>
+                  <span className="font-bold text-2xl text-[#D4AF37]">{formatPrice(finalPrice)}</span>
                 </div>
               </div>
 

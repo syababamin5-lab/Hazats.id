@@ -17,6 +17,7 @@ export default function TripDetailPage() {
   const [showBooking, setShowBooking] = useState(false);
   const [showInclude, setShowInclude] = useState(false);
   const [showItinerary, setShowItinerary] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState('');
 
   const getDaysCount = () => {
     if (!trip || !trip.departure_date || !trip.return_date) return 1;
@@ -231,9 +232,6 @@ export default function TripDetailPage() {
     }
   };
 
-  const [trip, setTrip] = useState<Trip | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
     if (!params.id) return;
@@ -288,6 +286,22 @@ export default function TripDetailPage() {
   const isFull = trip.remaining_quota <= 0;
   const filled = trip.max_quota - trip.remaining_quota;
   const quotaPercent = Math.round((filled / trip.max_quota) * 100);
+
+  let pkgs: any[] = [];
+  try {
+    if (trip.packages) pkgs = JSON.parse(trip.packages);
+  } catch (e) {}
+
+  // Set default selected package when pkgs are loaded
+  useEffect(() => {
+    if (pkgs.length > 0 && !selectedPackage) {
+      setSelectedPackage(pkgs[0].name);
+    }
+  }, [pkgs, selectedPackage]);
+
+  const currentPrice = pkgs.length > 0 
+    ? (pkgs.find(p => p.name === selectedPackage)?.price || pkgs[0].price) 
+    : trip.price;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -347,8 +361,11 @@ export default function TripDetailPage() {
             {/* Right Column: Floating Booking Card */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-3xl border border-gray-100 shadow-lg p-6 sticky top-24">
-                <div className="text-3xl font-bold text-[#D4AF37] mb-6 border-b border-gray-100 pb-6 text-center">
-                  {formatPrice(trip.price)}
+                <div className="text-center mb-6 border-b border-gray-100 pb-6">
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Start From</p>
+                  <div className="text-3xl font-bold text-[#D4AF37]">
+                    {formatPrice(currentPrice)}
+                  </div>
                 </div>
 
                 <div className="space-y-5 mb-8">
@@ -406,6 +423,37 @@ export default function TripDetailPage() {
                   </div>
                 </div>
 
+                {pkgs.length > 0 && (
+                  <div className="mb-6">
+                    <label className="block text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">
+                      Pilihan Paket
+                    </label>
+                    <div className="flex flex-col gap-2.5">
+                      {pkgs.map((p: any) => (
+                        <button
+                          key={p.name}
+                          onClick={() => setSelectedPackage(p.name)}
+                          className={`flex justify-between items-center p-3.5 rounded-xl border text-sm font-semibold transition-all ${
+                            selectedPackage === p.name
+                              ? 'border-[#D4AF37] bg-[#D4AF37]/5 text-gray-900 ring-1 ring-[#D4AF37]'
+                              : 'border-gray-200 text-gray-600 hover:border-[#D4AF37]/50 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedPackage === p.name ? 'border-[#D4AF37]' : 'border-gray-300'}`}>
+                              {selectedPackage === p.name && <div className="w-2 h-2 bg-[#D4AF37] rounded-full" />}
+                            </div>
+                            <span>{p.name}</span>
+                          </div>
+                          <span className={selectedPackage === p.name ? 'text-[#D4AF37]' : 'text-gray-500'}>
+                            {formatPrice(p.price)}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={() => !isFull && setShowBooking(true)}
                   disabled={isFull}
@@ -444,6 +492,8 @@ export default function TripDetailPage() {
       {showBooking && (
         <BookingModal
           trip={trip}
+          selectedPackage={selectedPackage}
+          currentPrice={currentPrice}
           onClose={() => setShowBooking(false)}
           formatPrice={formatPrice}
           formatDate={formatDate}
@@ -457,7 +507,9 @@ export default function TripDetailPage() {
           <div className="relative bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
             <div className="bg-black text-white px-6 py-5 flex justify-between items-center">
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest mb-0.5">Fasilitas Trip</p>
+                <p className="text-xs text-gray-400 uppercase tracking-widest mb-0.5">
+                  {selectedPackage ? `Fasilitas - ${selectedPackage}` : 'Fasilitas Trip'}
+                </p>
                 <h3 className="font-heading font-bold text-xl">Include & Exclude</h3>
               </div>
               <button
@@ -474,32 +526,41 @@ export default function TripDetailPage() {
                   <span className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-xs">✓</span>
                   Fasilitas Termasuk (Include)
                 </h4>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li className="flex items-start gap-2">
+                <ul className="space-y-3 text-sm text-gray-600">
+                  <li className="flex items-start gap-3">
                     <span className="text-emerald-500 font-bold mt-0.5">•</span>
                     <span>Tiket masuk (Simaksi) resmi Taman Nasional Gunung {trip.mountain_name}</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-emerald-500 font-bold mt-0.5">•</span>
                     <span>Guide / Pemandu berlisensi resmi & Porter Kelompok</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-emerald-500 font-bold mt-0.5">•</span>
                     <span>Peralatan Camp kelompok (Tenda kapasitas 4 isi 3, alat masak lengkap)</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-emerald-500 font-bold mt-0.5">•</span>
                     <span>Makan & logistik selama pendakian</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                    <span>Transportasi PP ({trip.transport || 'Avanza/Elf'}) dari Meeting Point</span>
+                  <li className="flex items-start gap-3">
+                    {selectedPackage.toLowerCase().includes('mepo') || selectedPackage.toLowerCase().includes('basecamp') || selectedPackage.toLowerCase().includes('bc') ? (
+                      <>
+                        <span className="text-gray-300 font-bold mt-0.5">✕</span>
+                        <span className="line-through text-gray-400 decoration-gray-300">Transportasi PP ({trip.transport || 'Avanza/Elf'}) dari Meeting Point awal</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                        <span>Transportasi PP ({trip.transport || 'Avanza/Elf'}) dari Meeting Point awal</span>
+                      </>
+                    )}
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-emerald-500 font-bold mt-0.5">•</span>
                     <span>P3K Standar & penanganan emergency awal</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-emerald-500 font-bold mt-0.5">•</span>
                     <span>Dokumentasi perjalanan (foto & video selama trip)</span>
                   </li>
@@ -511,24 +572,24 @@ export default function TripDetailPage() {
                   <span className="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold text-xs">✕</span>
                   Tidak Termasuk (Exclude)
                 </h4>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li className="flex items-start gap-2">
+                <ul className="space-y-3 text-sm text-gray-600">
+                  <li className="flex items-start gap-3">
                     <span className="text-red-400 font-bold mt-0.5">•</span>
                     <span>Perlengkapan pribadi (sleeping bag, matras, jaket tebal, jas hujan)</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-red-400 font-bold mt-0.5">•</span>
                     <span>Cemilan/snack pribadi & air minum tambahan</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-red-400 font-bold mt-0.5">•</span>
                     <span>Obat-obatan pribadi yang bersifat khusus</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-red-400 font-bold mt-0.5">•</span>
                     <span>Porter Pribadi (jika ingin barang pribadinya dibawakan)</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <span className="text-red-400 font-bold mt-0.5">•</span>
                     <span>Tips sukarela untuk Guide dan Driver</span>
                   </li>
