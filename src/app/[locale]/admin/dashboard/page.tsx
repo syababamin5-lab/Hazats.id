@@ -69,6 +69,27 @@ function TripTab({ token }: { token: string }) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [generatingDesc, setGeneratingDesc] = useState(false);
+
+  const handleGenerateDescription = async () => {
+    if (!form.mountain_name) return;
+    setGeneratingDesc(true);
+    try {
+      const res = await fetch(`https://id.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(form.mountain_name)}&format=json&origin=*`);
+      const data = await res.json();
+      const pages = data.query.pages;
+      const pageId = Object.keys(pages)[0];
+      if (pageId !== '-1' && pages[pageId].extract) {
+        setForm({ ...form, description: pages[pageId].extract });
+      } else {
+        alert("Deskripsi tidak ditemukan di Wikipedia untuk gunung ini.");
+      }
+    } catch (err) {
+      alert("Gagal mengambil data dari Wikipedia.");
+    } finally {
+      setGeneratingDesc(false);
+    }
+  };
 
   const fetchTrips = () => {
     setLoading(true);
@@ -189,7 +210,12 @@ function TripTab({ token }: { token: string }) {
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="contoh: Gunung Papandayan" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Deskripsi</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Deskripsi</label>
+                    <button type="button" onClick={handleGenerateDescription} disabled={generatingDesc || !form.mountain_name} className="text-xs bg-[#D4AF37] hover:bg-yellow-600 text-white px-3 py-1 rounded-full flex items-center gap-1.5 transition-colors disabled:opacity-50">
+                      <RefreshCw size={12} className={generatingDesc ? "animate-spin" : ""} /> {generatingDesc ? 'Mencari...' : 'Generate Wikipedia'}
+                    </button>
+                  </div>
                   <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
                     rows={3} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none" placeholder="Deskripsi singkat trip ini..." />
                 </div>
