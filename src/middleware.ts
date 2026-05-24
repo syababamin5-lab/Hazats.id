@@ -5,8 +5,8 @@ export default createMiddleware(routing);
  
 export const config = {
   matcher: [
-    // Redirect root dan semua path tanpa locale prefix
+    // Redirect root dan semua path tanpa locale prefix, KECUALI /api/
     '/',
-    '/((?!_next|_vercel|.*\\..*).*)'
+    '/((?!api|_next|_vercel|.*\\..*).*)'
   ]
 };
