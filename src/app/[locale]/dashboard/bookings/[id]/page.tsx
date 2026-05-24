@@ -45,7 +45,10 @@ interface BookingDetail {
   };
 }
 
-export default function BookingDetailPage({ params }: { params: { id: string, locale: string } }) {
+import { use } from 'react';
+
+export default function BookingDetailPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
+  const { id } = use(params);
   const t = useTranslations('Dashboard');
   const router = useRouter();
   const [booking, setBooking] = useState<BookingDetail | null>(null);
@@ -66,12 +69,12 @@ export default function BookingDetailPage({ params }: { params: { id: string, lo
     })
       .then(r => r.json())
       .then((data: BookingDetail[]) => {
-        const found = data.find(b => b.id === Number(params.id));
+        const found = data.find(b => b.id === Number(id));
         setBooking(found || null);
       })
       .catch(() => setBooking(null))
       .finally(() => setLoading(false));
-  }, [params.id, router]);
+  }, [id, router]);
 
   const handleUploadProof = async (file: File) => {
     const token = localStorage.getItem('token');
@@ -241,23 +244,23 @@ export default function BookingDetailPage({ params }: { params: { id: string, lo
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nama Lengkap</p>
-                  <p className="font-semibold text-gray-900">{booking.user.name}</p>
+                  <p className="font-semibold text-gray-900">{booking.user?.name || '-'}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Email</p>
-                  <p className="font-semibold text-gray-900">{booking.user.email}</p>
+                  <p className="font-semibold text-gray-900">{booking.user?.email || '-'}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nomor WhatsApp</p>
-                  <p className="font-semibold text-gray-900">{booking.user.phone}</p>
+                  <p className="font-semibold text-gray-900">{booking.user?.phone || '-'}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">NIK KTP</p>
-                  <p className="font-semibold text-gray-900">{booking.user.nik || '-'}</p>
+                  <p className="font-semibold text-gray-900">{booking.user?.nik || '-'}</p>
                 </div>
                 <div className="sm:col-span-2">
                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Kontak Darurat</p>
-                  <p className="font-semibold text-gray-900">{booking.user.emergency_contact || '-'}</p>
+                  <p className="font-semibold text-gray-900">{booking.user?.emergency_contact || '-'}</p>
                 </div>
               </div>
             </div>
