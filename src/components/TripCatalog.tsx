@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Calendar, Users, Bus } from 'lucide-react';
+import { Calendar, Users, Bus, Mountain } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import BookingModal from './BookingModal';
 
@@ -102,13 +102,14 @@ export default function TripCatalog() {
                   className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col"
                 >
                   {/* Trip Image */}
-                  <div className="h-56 overflow-hidden relative">
+                  <div className="h-56 overflow-hidden relative bg-gray-100 flex justify-center items-center">
+                    {!trip.image_url && <Mountain size={48} className="text-gray-300 opacity-50" />}
                     <div
                       className="absolute inset-0 bg-cover bg-center transition-all duration-500 group-hover:scale-105"
-                      style={{
-                        backgroundImage: `url(${trip.image_url || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070'})`,
+                      style={trip.image_url ? {
+                        backgroundImage: `url(${trip.image_url})`,
                         filter: 'grayscale(20%)'
-                      }}
+                      } : {}}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
 

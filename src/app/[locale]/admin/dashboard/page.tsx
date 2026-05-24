@@ -166,8 +166,10 @@ function TripTab({ token }: { token: string }) {
         <div className="space-y-3">
           {trips.map(trip => (
             <div key={trip.id} className={`bg-white rounded-xl border p-4 flex items-center gap-4 hover:shadow-sm transition-shadow ${!trip.is_active ? 'opacity-50' : ''}`}>
-              <div className="w-14 h-14 rounded-lg bg-cover bg-center flex-shrink-0"
-                style={{ backgroundImage: `url(${trip.image_url || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=200'})` }} />
+              <div className="w-14 h-14 rounded-lg bg-cover bg-center flex-shrink-0 bg-gray-100 flex items-center justify-center"
+                style={trip.image_url ? { backgroundImage: `url(${trip.image_url})` } : {}}>
+                {!trip.image_url && <ImageIcon size={20} className="text-gray-300" />}
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <h4 className="font-bold text-sm truncate">{trip.mountain_name} {trip.via ? <span className="font-normal text-gray-500">via {trip.via}</span> : ''}</h4>
