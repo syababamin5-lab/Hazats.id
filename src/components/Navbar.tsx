@@ -13,10 +13,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     setMounted(true);
     setIsLoggedIn(!!localStorage.getItem('token'));
+    const name = localStorage.getItem('name');
+    if (name) setUserName(name.split(' ')[0]);
   }, [pathname]);
 
   const handleLanguageChange = (newLocale: string) => {
@@ -62,7 +65,7 @@ export default function Navbar() {
               <>
                 <Link href="/dashboard" className="hidden sm:flex items-center space-x-2 bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-full font-medium transition-colors">
                   <User size={18} />
-                  <span>{t('account')}</span>
+                  <span>{userName || t('account')}</span>
                 </Link>
                 
                 {/* Mobile Dashboard Button */}
