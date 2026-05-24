@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Calendar, Users, Bus, Mountain } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import BookingModal from './BookingModal';
+import { useRouter } from '@/i18n/routing';
 
 export interface Trip {
   id: number;
@@ -47,7 +47,7 @@ export default function TripCatalog() {
   const t = useTranslations('Trips');
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetch(`${API_URL}/trips`)
@@ -183,7 +183,7 @@ export default function TripCatalog() {
                     </div>
 
                     <button
-                      onClick={() => !isFull && setSelectedTrip(trip)}
+                      onClick={() => !isFull && router.push(`/trip/${trip.id}`)}
                       disabled={isFull}
                       className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                         isFull
@@ -191,7 +191,7 @@ export default function TripCatalog() {
                           : 'bg-black hover:bg-[#D4AF37] text-white hover:shadow-md hover:-translate-y-0.5'
                       }`}
                     >
-                      {isFull ? t('quota_full') : t('book')}
+                      {isFull ? t('quota_full') : 'Lihat Detail & Pesan'}
                     </button>
                   </div>
                 </div>
@@ -201,15 +201,7 @@ export default function TripCatalog() {
         )}
       </div>
 
-      {/* Booking Modal */}
-      {selectedTrip && (
-        <BookingModal
-          trip={selectedTrip}
-          onClose={() => setSelectedTrip(null)}
-          formatPrice={formatPrice}
-          formatDate={formatDate}
-        />
-      )}
+      {/* Booking Modal removed - moved to detail page */}
     </section>
   );
 }
