@@ -74,7 +74,7 @@ function TripTab({ token }: { token: string }) {
 
   const handleGenerateDescription = async () => {
     if (!form.mountain_name) return;
-    const apiKey = localStorage.getItem('gemini_api_key');
+    const apiKey = localStorage.getItem('gemini_api_key')?.trim();
     if (!apiKey) {
       alert("Silakan masukkan Google Gemini API Key di tab Konfigurasi terlebih dahulu.");
       return;
@@ -92,7 +92,10 @@ function TripTab({ token }: { token: string }) {
         })
       });
 
-      if (!res.ok) throw new Error("Gagal atau kuota habis");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData?.error?.message || "Gagal atau kuota habis");
+      }
       const data = await res.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
@@ -101,8 +104,8 @@ function TripTab({ token }: { token: string }) {
       } else {
         alert("Gagal memformulasikan kalimat. Coba lagi.");
       }
-    } catch (err) {
-      alert("Gagal memproses AI generator. Pastikan API Key Anda benar.");
+    } catch (err: any) {
+      alert("Gagal memproses AI: " + err.message + "\nPastikan API Key Anda benar dan tidak ada spasi tambahan.");
     } finally {
       setGeneratingDesc(false);
     }
