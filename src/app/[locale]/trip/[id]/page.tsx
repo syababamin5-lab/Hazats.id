@@ -238,8 +238,18 @@ export default function TripDetailPage() {
     fetch(`${API_URL}/trips/${params.id}`)
       .then(res => res.json())
       .then(data => {
-        if (data && data.id) setTrip(data);
-        else setTrip(null);
+        if (data && data.id) {
+          setTrip(data);
+          // Set default selected package from the fetched trip data
+          if (data.packages) {
+            try {
+              const parsed = JSON.parse(data.packages);
+              if (parsed.length > 0) setSelectedPackage(parsed[0].name);
+            } catch (e) {}
+          }
+        } else {
+          setTrip(null);
+        }
       })
       .catch(() => setTrip(null))
       .finally(() => setLoading(false));
@@ -292,15 +302,8 @@ export default function TripDetailPage() {
     if (trip.packages) pkgs = JSON.parse(trip.packages);
   } catch (e) {}
 
-  // Set default selected package when pkgs are loaded
-  useEffect(() => {
-    if (pkgs.length > 0 && !selectedPackage) {
-      setSelectedPackage(pkgs[0].name);
-    }
-  }, [pkgs, selectedPackage]);
-
-  const currentPrice = pkgs.length > 0 
-    ? (pkgs.find(p => p.name === selectedPackage)?.price || pkgs[0].price) 
+  const currentPrice = pkgs.length > 0
+    ? (pkgs.find((p: any) => p.name === selectedPackage)?.price || pkgs[0].price)
     : trip.price;
 
   return (
