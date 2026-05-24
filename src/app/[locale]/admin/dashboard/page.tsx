@@ -126,16 +126,18 @@ function TripTab({ token }: { token: string }) {
 
   const openCreate = () => {
     setEditTrip(null);
-    setForm({ mountain_name: '', via: '', description: '', trip_type: '', difficulty: 'Pemula', departure_date: '', return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '', paketA: '', paketB: '', mepoBC: '' });
+    setForm({ mountain_name: '', via: '', description: '', trip_type: '', difficulty: 'Pemula', departure_date: '', return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '', paketA: '', paketB: '', mepoBC: '', isPackage: false });
     setError('');
     setShowForm(true);
   };
   const openEdit = (trip: Trip) => {
     setEditTrip(trip);
     let pA = '', pB = '', mBC = '';
+    let hasPackages = false;
     if (trip.packages) {
       try {
         const pkgs = JSON.parse(trip.packages);
+        if (pkgs.length > 0) hasPackages = true;
         pkgs.forEach((p: any) => {
           if (p.name === 'Paket A') pA = p.price.toString();
           if (p.name === 'Paket B') pB = p.price.toString();
@@ -148,7 +150,7 @@ function TripTab({ token }: { token: string }) {
       difficulty: trip.difficulty, departure_date: trip.departure_date, return_date: trip.return_date || '',
       max_quota: trip.max_quota, transport: trip.transport || '', price: trip.price,
       meeting_point: trip.meeting_point || '', image_url: trip.image_url || '',
-      paketA: pA, paketB: pB, mepoBC: mBC
+      paketA: pA, paketB: pB, mepoBC: mBC, isPackage: hasPackages
     });
     setError('');
     setShowForm(true);
@@ -157,18 +159,19 @@ function TripTab({ token }: { token: string }) {
   const handleSave = async () => {
     setSaving(true); setError('');
     try {
-      const pkgs = [];
-      if (form.paketA) pkgs.push({ name: 'Paket A', price: Number(form.paketA) });
-      if (form.paketB) pkgs.push({ name: 'Paket B', price: Number(form.paketB) });
-      if (form.mepoBC) pkgs.push({ name: 'Mepo BC', price: Number(form.mepoBC) });
-      
       let lowestPrice = Number(form.price);
-      if (pkgs.length > 0) {
-        lowestPrice = Math.min(...pkgs.map(p => p.price));
+      let pkgs: any[] = [];
+      if (form.isPackage) {
+        if (form.paketA) pkgs.push({ name: 'Paket A', price: Number(form.paketA) });
+        if (form.paketB) pkgs.push({ name: 'Paket B', price: Number(form.paketB) });
+        if (form.mepoBC) pkgs.push({ name: 'Mepo BC', price: Number(form.mepoBC) });
+        if (pkgs.length > 0) {
+          lowestPrice = Math.min(...pkgs.map(p => p.price));
+        }
       }
 
       const payload: any = { ...form, price: lowestPrice, max_quota: Number(form.max_quota), packages: pkgs.length > 0 ? JSON.stringify(pkgs) : null };
-      delete payload.paketA; delete payload.paketB; delete payload.mepoBC;
+      delete payload.paketA; delete payload.paketB; delete payload.mepoBC; delete payload.isPackage;
 
       const url = editTrip ? `${API_URL}/trips/${editTrip.id}` : `${API_URL}/trips`;
       const method = editTrip ? 'PUT' : 'POST';
@@ -322,24 +325,48 @@ function TripTab({ token }: { token: string }) {
                   </select>
                 </div>
                 <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
-                  <label className="block text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">Pilihan Paket Harga (Isi yang tersedia)</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">Harga Paket A</label>
-                      <input type="number" value={form.paketA} onChange={e => setForm({ ...form, paketA: e.target.value })}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Contoh: 750000" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">Harga Paket B</label>
-                      <input type="number" value={form.paketB} onChange={e => setForm({ ...form, paketB: e.target.value })}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Kosongkan jika tidak ada" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">Harga Mepo BC</label>
-                      <input type="number" value={form.mepoBC} onChange={e => setForm({ ...form, mepoBC: e.target.value })}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Kosongkan jika tidak ada" />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                    <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Pengaturan Harga</label>
+                    <div className="flex items-center bg-gray-100 p-1 rounded-xl w-fit">
+                      <button type="button" onClick={() => setForm({ ...form, isPackage: false })}
+                        className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${!form.isPackage ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}>
+                        Harga Tunggal
+                      </button>
+                      <button type="button" onClick={() => setForm({ ...form, isPackage: true })}
+                        className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${form.isPackage ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}>
+                        Pilihan Paket
+                      </button>
                     </div>
                   </div>
+                  
+                  {!form.isPackage ? (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">Harga Trip (Rp)</label>
+                      <input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })}
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Contoh: 750000" />
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-xs text-gray-500 mb-3 font-medium">Isi paket yang tersedia. Biarkan kosong jika paket tersebut tidak ada.</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1.5">Harga Paket A</label>
+                          <input type="number" value={form.paketA} onChange={e => setForm({ ...form, paketA: e.target.value })}
+                            className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Contoh: 750000" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1.5">Harga Paket B</label>
+                          <input type="number" value={form.paketB} onChange={e => setForm({ ...form, paketB: e.target.value })}
+                            className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Kosongkan" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1.5">Harga Mepo BC</label>
+                          <input type="number" value={form.mepoBC} onChange={e => setForm({ ...form, mepoBC: e.target.value })}
+                            className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Kosongkan" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Transportasi</label>
