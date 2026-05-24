@@ -1,22 +1,73 @@
 {
   "Index": {
     "title": "Taklukkan Puncak Tanpa Repot",
-    "description": "Premium Open Trip & Guiding Gunung di Jawa Barat",
+    "description": "Layanan Premium Open Trip & Guiding Gunung di Jawa Barat. All-inclusive, profesional, dan aman.",
     "cta": "Lihat Jadwal Trip",
     "login": "Masuk / Daftar"
   },
   "Services": {
-    "guide": "Guide Profesional",
+    "title": "Semua Sudah Termasuk",
+    "guide": "Pemandu Profesional",
+    "guide_desc": "Pemandu gunung bersertifikat & berpengalaman",
     "tent": "Tenda Premium",
+    "tent_desc": "Tenda dome lengkap dengan sleeping bag",
     "cooking": "Alat Masak",
-    "transport": "Transportasi Lokal (Kab. Bandung)"
+    "cooking_desc": "Perlengkapan masak & logistik lengkap",
+    "transport": "Transportasi Lokal",
+    "transport_desc": "Kendaraan AC dari Kab. Bandung"
   },
   "Trips": {
     "title": "Jadwal Open Trip Aktif",
-    "difficulty": "Tingkat Kesulitan",
-    "quota": "Sisa Kuota",
-    "date": "Tanggal Keberangkatan",
-    "transport": "Info Transportasi",
-    "book": "Pesan Sekarang"
+    "difficulty": "Kesulitan",
+    "quota": "Kuota",
+    "date": "Tanggal Berangkat",
+    "transport": "Transportasi",
+    "book": "Pesan Sekarang",
+    "quota_full": "Penuh",
+    "loading": "Memuat jadwal trip..."
+  },
+  "Booking": {
+    "confirm_title": "Konfirmasi Pemesanan",
+    "price": "Harga",
+    "departure": "Tanggal Berangkat",
+    "transport": "Transportasi",
+    "meeting_point": "Titik Kumpul",
+    "submit": "Konfirmasi Pesan",
+    "cancel": "Batal",
+    "success_title": "Pemesanan Berhasil!",
+    "success_desc": "Booking Anda telah dibuat. Silakan upload bukti pembayaran untuk mengkonfirmasi slot Anda.",
+    "upload_proof": "Upload Bukti Bayar",
+    "upload_done": "Bukti pembayaran berhasil diupload!",
+    "later": "Nanti Saja",
+    "go_dashboard": "Lihat Dashboard →",
+    "login_required": "Silakan masuk terlebih dahulu untuk memesan trip"
+  },
+  "Dashboard": {
+    "title": "Dasbor Saya",
+    "member_card": "Kartu Anggota Anda",
+    "download_card": "Unduh Kartu Digital",
+    "my_trips": "Riwayat Trip Saya",
+    "active_orders": "Pesanan Aktif",
+    "no_trips": "Belum ada trip aktif yang Anda ikuti.",
+    "find_trips": "Cari jadwal open trip",
+    "upload_proof": "Upload Bukti Bayar",
+    "view_proof": "Lihat Bukti",
+    "member_since": "MEMBER SEJAK",
+    "official_id": "ID Pendaki Resmi",
+    "status_pending": "Menunggu Konfirmasi",
+    "status_confirmed": "Dikonfirmasi",
+    "status_cancelled": "Dibatalkan",
+    "logout": "Keluar"
+  },
+  "Footer": {
+    "tagline": "Layanan guiding gunung & open trip premium di Jawa Barat.",
+    "quick_links": "Tautan Cepat",
+    "contact": "Hubungi Kami",
+    "follow": "Ikuti Kami",
+    "rights": "Hak cipta dilindungi.",
+    "home": "Beranda",
+    "trips": "Jadwal Trip",
+    "register": "Daftar",
+    "login": "Masuk"
   }
 }

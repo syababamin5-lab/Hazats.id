@@ -4,5 +4,9 @@ import {routing} from './i18n/routing';
 export default createMiddleware(routing);
  
 export const config = {
-  matcher: ['/', '/(id|en)/:path*']
+  matcher: [
+    // Redirect root dan semua path tanpa locale prefix
+    '/',
+    '/((?!_next|_vercel|.*\\..*).*)'
+  ]
 };

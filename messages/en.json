@@ -1,22 +1,73 @@
 {
   "Index": {
     "title": "Conquer the Heights, Zero Hassle",
-    "description": "Premium Open Trip & Mountain Guiding in West Java",
+    "description": "Premium Open Trip & Mountain Guiding in West Java. All-inclusive, professional, and safe.",
     "cta": "See Trip Schedule",
     "login": "Login / Sign Up"
   },
   "Services": {
+    "title": "Everything Included",
     "guide": "Professional Guide",
+    "guide_desc": "Certified & experienced mountain guides",
     "tent": "Premium Tents",
+    "tent_desc": "Dome tents with sleeping bags",
     "cooking": "Cooking Gear",
-    "transport": "Local Transport (Kab. Bandung)"
+    "cooking_desc": "Full cooking equipment & meals",
+    "transport": "Local Transport",
+    "transport_desc": "AC vehicle from Kab. Bandung"
   },
   "Trips": {
     "title": "Active Open Trip Schedule",
     "difficulty": "Difficulty",
-    "quota": "Quota Available",
+    "quota": "Quota",
     "date": "Departure Date",
-    "transport": "Transport Info",
-    "book": "Book Now"
+    "transport": "Transport",
+    "book": "Book Now",
+    "quota_full": "Full",
+    "loading": "Loading trips..."
+  },
+  "Booking": {
+    "confirm_title": "Confirm Booking",
+    "price": "Price",
+    "departure": "Departure Date",
+    "transport": "Transport",
+    "meeting_point": "Meeting Point",
+    "submit": "Confirm Booking",
+    "cancel": "Cancel",
+    "success_title": "Booking Successful!",
+    "success_desc": "Your booking is created. Please upload payment proof to confirm your slot.",
+    "upload_proof": "Upload Payment Proof",
+    "upload_done": "Payment proof uploaded!",
+    "later": "Do it later",
+    "go_dashboard": "Go to Dashboard →",
+    "login_required": "Please log in to book a trip"
+  },
+  "Dashboard": {
+    "title": "My Dashboard",
+    "member_card": "Your Member Card",
+    "download_card": "Download Digital Card",
+    "my_trips": "My Trips (My Trips)",
+    "active_orders": "Active Orders",
+    "no_trips": "You have no active trips yet.",
+    "find_trips": "Find open trip schedule",
+    "upload_proof": "Upload Payment Proof",
+    "view_proof": "View Proof",
+    "member_since": "MEMBER SINCE",
+    "official_id": "Official Climber ID",
+    "status_pending": "Awaiting Confirmation",
+    "status_confirmed": "Confirmed",
+    "status_cancelled": "Cancelled",
+    "logout": "Logout"
+  },
+  "Footer": {
+    "tagline": "Premium mountain guiding & open trip service in West Java.",
+    "quick_links": "Quick Links",
+    "contact": "Contact Us",
+    "follow": "Follow Us",
+    "rights": "All rights reserved.",
+    "home": "Home",
+    "trips": "Trip Schedule",
+    "register": "Register",
+    "login": "Login"
   }
 }

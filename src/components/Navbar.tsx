@@ -2,14 +2,22 @@
 
 import {useLocale, useTranslations} from 'next-intl';
 import {usePathname, useRouter} from '@/i18n/routing';
-import {Globe, User} from 'lucide-react';
+import {Globe, User, LayoutDashboard} from 'lucide-react';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export default function Navbar() {
   const t = useTranslations('Index');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setIsLoggedIn(!!localStorage.getItem('token'));
+  }, [pathname]);
 
   const handleLanguageChange = (newLocale: string) => {
     router.replace(pathname, {locale: newLocale});
@@ -50,15 +58,33 @@ export default function Navbar() {
             </div>
 
             {/* Login / Sign Up Button */}
-            <button className="hidden sm:flex items-center space-x-2 bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-full font-medium transition-colors">
-              <User size={18} />
-              <span>{t('login')}</span>
-            </button>
-            
-            {/* Mobile Login Button */}
-            <button className="sm:hidden flex items-center justify-center bg-black hover:bg-gray-800 text-white w-10 h-10 rounded-full transition-colors">
-              <User size={18} />
-            </button>
+            {mounted && isLoggedIn ? (
+              <>
+                <Link href="/dashboard" className="hidden sm:flex items-center space-x-2 bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-full font-medium transition-colors">
+                  <LayoutDashboard size={18} />
+                  <span>Dashboard</span>
+                </Link>
+                
+                {/* Mobile Dashboard Button */}
+                <Link href="/dashboard" className="sm:hidden flex items-center justify-center bg-black hover:bg-gray-800 text-white w-10 h-10 rounded-full transition-colors">
+                  <LayoutDashboard size={18} />
+                </Link>
+              </>
+            ) : mounted && !isLoggedIn ? (
+              <>
+                <Link href="/login" className="hidden sm:flex items-center space-x-2 bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-full font-medium transition-colors">
+                  <User size={18} />
+                  <span>{t('login')}</span>
+                </Link>
+                
+                {/* Mobile Login Button */}
+                <Link href="/login" className="sm:hidden flex items-center justify-center bg-black hover:bg-gray-800 text-white w-10 h-10 rounded-full transition-colors">
+                  <User size={18} />
+                </Link>
+              </>
+            ) : (
+              <div className="w-28 h-10 bg-gray-100 animate-pulse rounded-full hidden sm:block"></div>
+            )}
           </div>
         </div>
       </div>
