@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   LogOut, Mountain, Users, BookOpen, Image as ImageIcon,
   Plus, Edit2, Trash2, Check, X, Eye, Upload, ChevronDown,
-  RefreshCw, AlertCircle
+  RefreshCw, AlertCircle, Settings
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
@@ -61,6 +61,8 @@ function TripTab({ token }: { token: string }) {
   const [editTrip, setEditTrip] = useState<Trip | null>(null);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
   const [showGalleryPicker, setShowGalleryPicker] = useState(false);
+  const [transports, setTransports] = useState<{ id: number, name: string }[]>([]);
+  const [meetingPoints, setMeetingPoints] = useState<{ id: number, name: string }[]>([]);
   const [form, setForm] = useState({
     mountain_name: '', description: '', difficulty: 'Pemula', departure_date: '',
     return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: ''
@@ -78,8 +80,14 @@ function TripTab({ token }: { token: string }) {
     fetch(`${API_URL}/gallery`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(data => setGallery(Array.isArray(data) ? data : [])).catch(() => { });
   };
+  const fetchOptions = () => {
+    fetch(`${API_URL}/admin/config/transports`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(data => setTransports(Array.isArray(data) ? data : [])).catch(() => { });
+    fetch(`${API_URL}/admin/config/meeting-points`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(data => setMeetingPoints(Array.isArray(data) ? data : [])).catch(() => { });
+  };
 
-  useEffect(() => { fetchTrips(); fetchGallery(); }, []);
+  useEffect(() => { fetchTrips(); fetchGallery(); fetchOptions(); }, []);
 
   const openCreate = () => {
     setEditTrip(null);
@@ -214,13 +222,19 @@ function TripTab({ token }: { token: string }) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Transportasi</label>
-                  <input value={form.transport} onChange={e => setForm({ ...form, transport: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Hiace Commuter (AC)" />
+                  <select value={form.transport} onChange={e => setForm({ ...form, transport: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white">
+                    <option value="">Pilih Transportasi...</option>
+                    {transports.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                  </select>
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Titik Kumpul</label>
-                  <input value={form.meeting_point} onChange={e => setForm({ ...form, meeting_point: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Alun-Alun Soreang, Kab. Bandung" />
+                  <select value={form.meeting_point} onChange={e => setForm({ ...form, meeting_point: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white">
+                    <option value="">Pilih Titik Kumpul...</option>
+                    {meetingPoints.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+                  </select>
                 </div>
 
                 {/* Image URL + Gallery Picker */}
@@ -565,6 +579,116 @@ function GalleryTab({ token }: { token: string }) {
   );
 }
 
+// ─── Tab: Konfigurasi ──────────────────────────────────────────────────────
+function ConfigTab({ token }: { token: string }) {
+  const [transports, setTransports] = useState<{ id: number, name: string }[]>([]);
+  const [meetingPoints, setMeetingPoints] = useState<{ id: number, name: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const [newTransport, setNewTransport] = useState('');
+  const [newMeetingPoint, setNewMeetingPoint] = useState('');
+  
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [tRes, mRes] = await Promise.all([
+        fetch(`${API_URL}/admin/config/transports`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/admin/config/meeting-points`, { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+      const tData = await tRes.json();
+      const mData = await mRes.json();
+      setTransports(Array.isArray(tData) ? tData : []);
+      setMeetingPoints(Array.isArray(mData) ? mData : []);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const addTransport = async () => {
+    if (!newTransport.trim()) return;
+    await fetch(`${API_URL}/admin/config/transports`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newTransport })
+    });
+    setNewTransport('');
+    fetchData();
+  };
+
+  const deleteTransport = async (id: number) => {
+    if (!confirm('Hapus opsi transportasi ini?')) return;
+    await fetch(`${API_URL}/admin/config/transports/${id}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+    });
+    fetchData();
+  };
+
+  const addMeetingPoint = async () => {
+    if (!newMeetingPoint.trim()) return;
+    await fetch(`${API_URL}/admin/config/meeting-points`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newMeetingPoint })
+    });
+    setNewMeetingPoint('');
+    fetchData();
+  };
+
+  const deleteMeetingPoint = async (id: number) => {
+    if (!confirm('Hapus opsi titik kumpul ini?')) return;
+    await fetch(`${API_URL}/admin/config/meeting-points/${id}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+    });
+    fetchData();
+  };
+
+  if (loading) return <div className="animate-pulse space-y-4"><div className="h-40 bg-gray-100 rounded-xl"></div><div className="h-40 bg-gray-100 rounded-xl"></div></div>;
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-heading font-bold text-xl">Pengaturan Konfigurasi Dropdown</h3>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h4 className="font-heading font-bold text-lg mb-4">Opsi Transportasi</h4>
+          <div className="flex gap-2 mb-4">
+            <input value={newTransport} onChange={e => setNewTransport(e.target.value)} placeholder="Tambah Transportasi Baru"
+              className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" />
+            <button onClick={addTransport} className="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#D4AF37] transition-colors">Tambah</button>
+          </div>
+          <ul className="space-y-2">
+            {transports.map(t => (
+              <li key={t.id} className="flex justify-between items-center bg-gray-50 px-4 py-2.5 rounded-lg border border-gray-100">
+                <span className="text-sm font-medium">{t.name}</span>
+                <button onClick={() => deleteTransport(t.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors"><Trash2 size={16} /></button>
+              </li>
+            ))}
+            {transports.length === 0 && <li className="text-center text-sm text-gray-400 py-4">Belum ada opsi transportasi.</li>}
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h4 className="font-heading font-bold text-lg mb-4">Opsi Titik Kumpul</h4>
+          <div className="flex gap-2 mb-4">
+            <input value={newMeetingPoint} onChange={e => setNewMeetingPoint(e.target.value)} placeholder="Tambah Titik Kumpul Baru"
+              className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" />
+            <button onClick={addMeetingPoint} className="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#D4AF37] transition-colors">Tambah</button>
+          </div>
+          <ul className="space-y-2">
+            {meetingPoints.map(m => (
+              <li key={m.id} className="flex justify-between items-center bg-gray-50 px-4 py-2.5 rounded-lg border border-gray-100">
+                <span className="text-sm font-medium">{m.name}</span>
+                <button onClick={() => deleteMeetingPoint(m.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors"><Trash2 size={16} /></button>
+              </li>
+            ))}
+            {meetingPoints.length === 0 && <li className="text-center text-sm text-gray-400 py-4">Belum ada opsi titik kumpul.</li>}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Admin Dashboard ────────────────────────────────────────────────
 export default function AdminDashboard() {
   const router = useRouter();
@@ -600,6 +724,7 @@ export default function AdminDashboard() {
     { id: 'bookings', label: 'Verifikasi Booking', icon: BookOpen },
     { id: 'members', label: 'Database Anggota', icon: Users },
     { id: 'gallery', label: 'Galeri Foto', icon: ImageIcon },
+    { id: 'config', label: 'Konfigurasi', icon: Settings },
   ];
 
   return (
@@ -656,6 +781,7 @@ export default function AdminDashboard() {
         {activeTab === 'bookings' && <BookingTab token={token} />}
         {activeTab === 'members' && <MemberTab token={token} />}
         {activeTab === 'gallery' && <GalleryTab token={token} />}
+        {activeTab === 'config' && <ConfigTab token={token} />}
       </main>
     </div>
   );
