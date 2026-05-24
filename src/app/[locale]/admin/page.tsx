@@ -5,7 +5,7 @@ import { useRouter } from '@/i18n/routing';
 import Link from 'next/link';
 import { AlertCircle } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
 
 export default function AdminLoginPage() {
   const router = useRouter();

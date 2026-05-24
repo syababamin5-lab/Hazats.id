@@ -13,7 +13,7 @@ interface BookingModalProps {
   formatDate: (date: string) => string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
 
 export default function BookingModal({ trip, onClose, formatPrice, formatDate }: BookingModalProps) {
   const t = useTranslations('Booking');

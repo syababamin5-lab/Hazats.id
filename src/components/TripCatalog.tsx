@@ -21,7 +21,7 @@ export interface Trip {
   is_active: boolean;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
 
 export function formatPrice(price: number) {
   return new Intl.NumberFormat('id-ID', {
