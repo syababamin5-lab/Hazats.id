@@ -160,7 +160,7 @@ function TripTab({ token }: { token: string }) {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Nonaktifkan trip ini?')) return;
+    if (!confirm('Hapus trip ini secara permanen? Peringatan: Semua data pemesanan yang terkait dengan trip ini juga akan ikut terhapus!')) return;
     await fetch(`${API_URL}/trips/${id}`, {
       method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
     });
