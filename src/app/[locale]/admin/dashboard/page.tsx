@@ -13,7 +13,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_AP
 
 // ─── Types ──────────────────────────────────────────────────────────────
 interface Trip {
-  id: number; mountain_name: string; via?: string; description: string; difficulty: string;
+  id: number; mountain_name: string; via?: string; description: string; trip_type?: string; difficulty: string;
   departure_date: string; return_date: string; max_quota: number; remaining_quota: number;
   transport: string; price: number; meeting_point: string; image_url: string; is_active: boolean;
 }
@@ -114,7 +114,7 @@ function TripTab({ token }: { token: string }) {
 
   const openCreate = () => {
     setEditTrip(null);
-    setForm({ mountain_name: '', via: '', description: '', difficulty: 'Pemula', departure_date: '', return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '' });
+    setForm({ mountain_name: '', via: '', description: '', trip_type: '', difficulty: 'Pemula', departure_date: '', return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: '' });
     setError('');
     setShowForm(true);
   };
