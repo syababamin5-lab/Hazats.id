@@ -181,12 +181,33 @@ function TripTab({ token }: { token: string }) {
     setSaving(false);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Hapus trip ini secara permanen? Peringatan: Semua data pemesanan yang terkait dengan trip ini juga akan ikut terhapus!')) return;
-    await fetch(`${API_URL}/trips/${id}`, {
-      method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
-    });
-    fetchTrips();
+  const handleDelete = async (id: number, tripName: string) => {
+    const trip = trips.find(t => t.id === id);
+    const hasBookings = trip && (trip.max_quota - trip.remaining_quota) > 0;
+    
+    if (hasBookings) {
+      const confirmForce = confirm(
+        `⚠️ Trip "${tripName}" sudah ada peserta yang mendaftar.\n\nTrip ini tidak bisa dihapus. Gunakan tombol Edit untuk menonaktifkan trip ini saja.\n\nTekan OK untuk membuka form edit.`
+      );
+      if (confirmForce) openEdit(trip!);
+      return;
+    }
+    
+    if (!confirm(`Hapus trip "${tripName}" secara permanen?\nTindakan ini tidak dapat dibatalkan.`)) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/trips/${id}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert('❌ Gagal menghapus: ' + (data.detail || 'Terjadi kesalahan'));
+        return;
+      }
+      fetchTrips();
+    } catch (e: any) {
+      alert('❌ Gagal menghapus: ' + e.message);
+    }
   };
 
   return (
@@ -222,7 +243,7 @@ function TripTab({ token }: { token: string }) {
                 <button onClick={() => openEdit(trip)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-black transition-colors">
                   <Edit2 size={15} />
                 </button>
-                <button onClick={() => handleDelete(trip.id)} className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-500 transition-colors">
+                <button onClick={() => handleDelete(trip.id, trip.mountain_name)} className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-500 transition-colors">
                   <Trash2 size={15} />
                 </button>
               </div>
