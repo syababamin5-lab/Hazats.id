@@ -740,7 +740,9 @@ function GalleryTab({ token }: { token: string }) {
 function ConfigTab({ token }: { token: string }) {
   const [transports, setTransports] = useState<{ id: number, name: string }[]>([]);
   const [meetingPoints, setMeetingPoints] = useState<{ id: number, name: string }[]>([]);
+  const [siteConfig, setSiteConfig] = useState({ include_exclude: '', itinerary: '' });
   const [loading, setLoading] = useState(true);
+  const [savingSiteConfig, setSavingSiteConfig] = useState(false);
   
   const [newTransport, setNewTransport] = useState('');
   const [newMeetingPoint, setNewMeetingPoint] = useState('');
@@ -758,19 +760,36 @@ function ConfigTab({ token }: { token: string }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [tRes, mRes] = await Promise.all([
+      const [tRes, mRes, sRes] = await Promise.all([
         fetch(`${API_URL}/admin/config/transports`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_URL}/admin/config/meeting-points`, { headers: { Authorization: `Bearer ${token}` } })
+        fetch(`${API_URL}/admin/config/meeting-points`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/admin/config/site`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
       const tData = await tRes.json();
       const mData = await mRes.json();
+      const sData = await sRes.json();
       setTransports(Array.isArray(tData) ? tData : []);
       setMeetingPoints(Array.isArray(mData) ? mData : []);
+      if (sData) setSiteConfig({ include_exclude: sData.include_exclude || '', itinerary: sData.itinerary || '' });
     } catch (e) { console.error(e); }
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const saveSiteConfig = async () => {
+    setSavingSiteConfig(true);
+    try {
+      await fetch(`${API_URL}/admin/config/site`, {
+        method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(siteConfig)
+      });
+      alert('Konfigurasi Global berhasil disimpan!');
+    } catch (e) {
+      alert('Gagal menyimpan konfigurasi.');
+    }
+    setSavingSiteConfig(false);
+  };
 
   const addTransport = async () => {
     if (!newTransport.trim()) return;
@@ -836,6 +855,44 @@ function ConfigTab({ token }: { token: string }) {
             className="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#D4AF37] transition-colors"
           >
             Simpan Key
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+        <h4 className="font-heading font-bold text-lg mb-2 flex items-center gap-2">
+           Konfigurasi Trip (Global)
+        </h4>
+        <p className="text-sm text-gray-500 mb-4">
+          Isi ini akan ditampilkan saat pengguna mengklik tombol "Include & Exclude" atau "Itinerary" di halaman pemesanan trip.
+        </p>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold mb-1">Include & Exclude</label>
+            <textarea 
+              value={siteConfig.include_exclude} 
+              onChange={e => setSiteConfig({...siteConfig, include_exclude: e.target.value})}
+              rows={5}
+              placeholder="Fasilitas yang didapatkan dan tidak didapatkan..." 
+              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1">Itinerary (Rencana Perjalanan)</label>
+            <textarea 
+              value={siteConfig.itinerary} 
+              onChange={e => setSiteConfig({...siteConfig, itinerary: e.target.value})}
+              rows={5}
+              placeholder="Jadwal perjalanan dari hari pertama sampai selesai..." 
+              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm" 
+            />
+          </div>
+          <button 
+            onClick={saveSiteConfig} 
+            disabled={savingSiteConfig}
+            className="bg-black text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#D4AF37] transition-colors disabled:opacity-50"
+          >
+            {savingSiteConfig ? 'Menyimpan...' : 'Simpan Konfigurasi Trip'}
           </button>
         </div>
       </div>

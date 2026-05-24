@@ -15,10 +15,17 @@ export default function TripDetailPage() {
   const params = useParams();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showBooking, setShowBooking] = useState(false);
   const [showInclude, setShowInclude] = useState(false);
   const [showItinerary, setShowItinerary] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState('');
+  const [siteConfig, setSiteConfig] = useState<{ include_exclude: string; itinerary: string } | null>(null);
+
+  const parsedPackages = useMemo(() => {
+    if (!trip?.packages) return [];
+    try { return JSON.parse(trip.packages); } catch { return []; }
+  }, [trip?.packages]);
 
   const getDaysCount = () => {
     if (!trip || !trip.departure_date || !trip.return_date) return 1;
@@ -33,6 +40,9 @@ export default function TripDetailPage() {
 
   const renderItineraryContent = () => {
     if (!trip) return null;
+    if (siteConfig?.itinerary) {
+      return <div className="prose prose-sm max-w-none text-gray-600" dangerouslySetInnerHTML={{ __html: siteConfig.itinerary }} />;
+    }
     if (daysCount <= 1) {
       return (
         <div className="space-y-6">
@@ -236,24 +246,28 @@ export default function TripDetailPage() {
 
   useEffect(() => {
     if (!params.id) return;
-    fetch(`${API_URL}/trips/${params.id}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.id) {
-          setTrip(data);
-          // Set default selected package from the fetched trip data
-          if (data.packages) {
+    Promise.all([
+      fetch(`${API_URL}/trips/${params.id}`).then(res => res.json()),
+      fetch(`${API_URL}/admin/config/site`).then(res => res.ok ? res.json() : null).catch(() => null)
+    ]).then(([tripData, configData]) => {
+        if (tripData && tripData.id) {
+          setTrip(tripData);
+          if (tripData.packages) {
             try {
-              const parsed = JSON.parse(data.packages);
+              const parsed = JSON.parse(tripData.packages);
               if (parsed.length > 0) setSelectedPackage(parsed[0].name);
             } catch (e) {}
           }
-        } else {
-          setTrip(null);
         }
+        if (configData) {
+          setSiteConfig({ include_exclude: configData.include_exclude || '', itinerary: configData.itinerary || '' });
+        }
+        setLoading(false);
       })
-      .catch(() => setTrip(null))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        setError('Gagal memuat data trip.');
+        setLoading(false);
+      });
   }, [params.id]);
 
   if (loading) {
@@ -525,80 +539,88 @@ export default function TripDetailPage() {
             </div>
             
             <div className="p-6 overflow-y-auto space-y-6">
-              <div>
-                <h4 className="font-bold text-sm text-emerald-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-xs">✓</span>
-                  Fasilitas Termasuk (Include)
-                </h4>
-                <ul className="space-y-3 text-sm text-gray-600">
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                    <span>Tiket masuk (Simaksi) resmi Taman Nasional Gunung {trip.mountain_name}</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                    <span>Guide / Pemandu berlisensi resmi & Porter Kelompok</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                    <span>Peralatan Camp kelompok (Tenda kapasitas 4 isi 3, alat masak lengkap)</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                    <span>Makan & logistik selama pendakian</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    {selectedPackage.toLowerCase().includes('mepo') || selectedPackage.toLowerCase().includes('basecamp') || selectedPackage.toLowerCase().includes('bc') ? (
-                      <>
-                        <span className="text-gray-300 font-bold mt-0.5">✕</span>
-                        <span className="line-through text-gray-400 decoration-gray-300">Transportasi PP ({trip.transport || 'Avanza/Elf'}) dari Meeting Point awal</span>
-                      </>
-                    ) : (
-                      <>
+              {siteConfig && siteConfig.include_exclude ? (
+                <div className="whitespace-pre-wrap text-sm text-gray-700 font-medium">
+                  {siteConfig.include_exclude}
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <h4 className="font-bold text-sm text-emerald-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-xs">✓</span>
+                      Fasilitas Termasuk (Include)
+                    </h4>
+                    <ul className="space-y-3 text-sm text-gray-600">
+                      <li className="flex items-start gap-3">
                         <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                        <span>Transportasi PP ({trip.transport || 'Avanza/Elf'}) dari Meeting Point awal</span>
-                      </>
-                    )}
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                    <span>P3K Standar & penanganan emergency awal</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                    <span>Dokumentasi perjalanan (foto & video selama trip)</span>
-                  </li>
-                </ul>
-              </div>
+                        <span>Tiket masuk (Simaksi) resmi Taman Nasional Gunung {trip.mountain_name}</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                        <span>Guide / Pemandu berlisensi resmi & Porter Kelompok</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                        <span>Peralatan Camp kelompok (Tenda kapasitas 4 isi 3, alat masak lengkap)</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                        <span>Makan & logistik selama pendakian</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        {selectedPackage.toLowerCase().includes('mepo') || selectedPackage.toLowerCase().includes('basecamp') || selectedPackage.toLowerCase().includes('bc') ? (
+                          <>
+                            <span className="text-gray-300 font-bold mt-0.5">✕</span>
+                            <span className="line-through text-gray-400 decoration-gray-300">Transportasi PP ({trip.transport || 'Avanza/Elf'}) dari Meeting Point awal</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                            <span>Transportasi PP ({trip.transport || 'Avanza/Elf'}) dari Meeting Point awal</span>
+                          </>
+                        )}
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                        <span>P3K Standar & penanganan emergency awal</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                        <span>Dokumentasi perjalanan (foto & video selama trip)</span>
+                      </li>
+                    </ul>
+                  </div>
 
-              <div className="border-t border-gray-100 pt-5">
-                <h4 className="font-bold text-sm text-red-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold text-xs">✕</span>
-                  Tidak Termasuk (Exclude)
-                </h4>
-                <ul className="space-y-3 text-sm text-gray-600">
-                  <li className="flex items-start gap-3">
-                    <span className="text-red-400 font-bold mt-0.5">•</span>
-                    <span>Perlengkapan pribadi (sleeping bag, matras, jaket tebal, jas hujan)</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-red-400 font-bold mt-0.5">•</span>
-                    <span>Cemilan/snack pribadi & air minum tambahan</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-red-400 font-bold mt-0.5">•</span>
-                    <span>Obat-obatan pribadi yang bersifat khusus</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-red-400 font-bold mt-0.5">•</span>
-                    <span>Porter Pribadi (jika ingin barang pribadinya dibawakan)</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-red-400 font-bold mt-0.5">•</span>
-                    <span>Tips sukarela untuk Guide dan Driver</span>
-                  </li>
-                </ul>
-              </div>
+                  <div className="border-t border-gray-100 pt-5">
+                    <h4 className="font-bold text-sm text-red-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold text-xs">✕</span>
+                      Tidak Termasuk (Exclude)
+                    </h4>
+                    <ul className="space-y-3 text-sm text-gray-600">
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-400 font-bold mt-0.5">•</span>
+                        <span>Perlengkapan pribadi (sleeping bag, matras, jaket tebal, jas hujan)</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-400 font-bold mt-0.5">•</span>
+                        <span>Cemilan/snack pribadi & air minum tambahan</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-400 font-bold mt-0.5">•</span>
+                        <span>Obat-obatan pribadi yang bersifat khusus</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-400 font-bold mt-0.5">•</span>
+                        <span>Porter Pribadi (jika ingin barang pribadinya dibawakan)</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-400 font-bold mt-0.5">•</span>
+                        <span>Tips sukarela untuk Guide dan Driver</span>
+                      </li>
+                    </ul>
+                  </div>
+                </>
+              )}
             </div>
             
             <div className="border-t border-gray-100 p-6 bg-gray-50 flex justify-end">
@@ -632,7 +654,13 @@ export default function TripDetailPage() {
             </div>
             
             <div className="p-6 overflow-y-auto">
-              {renderItineraryContent()}
+              {siteConfig && siteConfig.itinerary ? (
+                <div className="whitespace-pre-wrap text-sm text-gray-700 font-medium">
+                  {siteConfig.itinerary}
+                </div>
+              ) : (
+                renderItineraryContent()
+              )}
             </div>
             
             <div className="border-t border-gray-100 p-6 bg-gray-50 flex justify-end">
