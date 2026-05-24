@@ -13,9 +13,14 @@ function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <h3 className="font-heading font-bold text-2xl tracking-tighter mb-3">
-              HAZATS<span className="text-[#D4AF37] font-light">ADVENTURE</span>
-            </h3>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full border-2 border-white bg-black overflow-hidden shadow-sm flex-shrink-0">
+                <img src="/logo.png" alt="Hazats Adventure" className="w-full h-full object-cover" />
+              </div>
+              <h3 className="font-heading font-bold text-2xl tracking-tighter">
+                HAZATS<span className="text-[#D4AF37] font-light">ADVENTURE</span>
+              </h3>
+            </div>
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">{t('tagline')}</p>
             <div className="mt-5 flex gap-3">
               {/* Instagram */}

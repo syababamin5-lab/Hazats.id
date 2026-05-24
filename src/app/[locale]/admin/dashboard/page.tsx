@@ -847,8 +847,13 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14">
             <div className="flex items-center gap-3">
-              <Link href="/" className="font-heading font-bold text-base tracking-tighter">
-                HAZATS<span className="text-[#D4AF37]">ADVENTURE</span>
+              <Link href="/" className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full border border-white bg-black overflow-hidden shadow-sm flex-shrink-0">
+                  <img src="/logo.png" alt="Hazats Adventure" className="w-full h-full object-cover" />
+                </div>
+                <span className="font-heading font-bold text-base tracking-tighter hidden sm:block">
+                  HAZATS<span className="text-[#D4AF37]">ADVENTURE</span>
+                </span>
               </Link>
               <span className="text-gray-600 text-xs hidden sm:block">/ Admin Panel</span>
             </div>

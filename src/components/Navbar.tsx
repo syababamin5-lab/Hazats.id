@@ -32,8 +32,13 @@ export default function Navbar() {
         <div className="flex justify-between h-20 items-center">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="font-heading font-bold text-2xl tracking-tighter">
-              HAZATS<span className="text-gray-400 font-light">ADVENTURE</span>
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full border-2 border-white bg-black flex-shrink-0 overflow-hidden shadow-sm">
+                <img src="/logo.png" alt="Hazats Adventure" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-heading font-bold text-xl tracking-tighter hidden sm:block">
+                HAZATS<span className="text-gray-400 font-light">ADVENTURE</span>
+              </span>
             </Link>
           </div>
 

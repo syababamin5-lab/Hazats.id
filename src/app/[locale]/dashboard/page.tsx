@@ -143,8 +143,13 @@ export default function DashboardPage() {
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <Link href="/" className="font-heading font-bold text-xl tracking-tighter">
-              HAZATS<span className="text-gray-400 font-light">ADVENTURE</span>
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full border-2 border-white bg-black flex-shrink-0 overflow-hidden shadow-sm">
+                <img src="/logo.png" alt="Hazats Adventure" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-heading font-bold text-xl tracking-tighter hidden sm:block">
+                HAZATS<span className="text-gray-400 font-light">ADVENTURE</span>
+              </span>
             </Link>
             <div className="flex items-center gap-4">
               <span className="hidden sm:block text-sm text-gray-500">
