@@ -64,7 +64,7 @@ function TripTab({ token }: { token: string }) {
   const [transports, setTransports] = useState<{ id: number, name: string }[]>([]);
   const [meetingPoints, setMeetingPoints] = useState<{ id: number, name: string }[]>([]);
   const [form, setForm] = useState({
-    mountain_name: '', via: '', description: '', difficulty: 'Pemula', departure_date: '',
+    mountain_name: '', via: '', description: '', trip_type: '', difficulty: 'Pemula', departure_date: '',
     return_date: '', max_quota: 15, transport: '', price: 0, meeting_point: '', image_url: ''
   });
   const [saving, setSaving] = useState(false);
@@ -80,12 +80,14 @@ function TripTab({ token }: { token: string }) {
       const pages = data.query.pages;
       const pageId = Object.keys(pages)[0];
       if (pageId !== '-1' && pages[pageId].extract) {
-        setForm({ ...form, description: pages[pageId].extract });
+        const extract = pages[pageId].extract.split('.').slice(0, 3).join('.') + '.';
+        const promoText = `✨ Siapkan diri Anda untuk sebuah petualangan tak terlupakan di ${form.mountain_name}!\n\n${extract}\n\nJadikan liburan Anda lebih bermakna dengan pemandangan epik, udara segar, dan pengalaman seru bersama kami. Daftar sekarang sebelum kehabisan kuota!`;
+        setForm({ ...form, description: promoText });
       } else {
-        alert("Deskripsi tidak ditemukan di Wikipedia untuk gunung ini.");
+        alert("Referensi tidak ditemukan. Silakan isi manual.");
       }
     } catch (err) {
-      alert("Gagal mengambil data dari Wikipedia.");
+      alert("Gagal memproses AI generator.");
     } finally {
       setGeneratingDesc(false);
     }
@@ -119,7 +121,7 @@ function TripTab({ token }: { token: string }) {
   const openEdit = (trip: Trip) => {
     setEditTrip(trip);
     setForm({
-      mountain_name: trip.mountain_name, via: trip.via || '', description: trip.description || '',
+      mountain_name: trip.mountain_name, via: trip.via || '', description: trip.description || '', trip_type: trip.trip_type || '',
       difficulty: trip.difficulty, departure_date: trip.departure_date, return_date: trip.return_date || '',
       max_quota: trip.max_quota, transport: trip.transport || '', price: trip.price,
       meeting_point: trip.meeting_point || '', image_url: trip.image_url || ''
@@ -178,7 +180,7 @@ function TripTab({ token }: { token: string }) {
                   </span>
                   {!trip.is_active && <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Nonaktif</span>}
                 </div>
-                <p className="text-xs text-gray-500">{formatDate(trip.departure_date)} · {trip.remaining_quota}/{trip.max_quota} sisa · {formatPrice(trip.price)}</p>
+                <p className="text-xs text-gray-500">{formatDate(trip.departure_date)} {trip.trip_type ? `· ${trip.trip_type} ` : ''}· {trip.remaining_quota}/{trip.max_quota} sisa · {formatPrice(trip.price)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => openEdit(trip)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-black transition-colors">
@@ -222,7 +224,7 @@ function TripTab({ token }: { token: string }) {
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Deskripsi</label>
                     <button type="button" onClick={handleGenerateDescription} disabled={generatingDesc || !form.mountain_name} className="text-xs bg-[#D4AF37] hover:bg-yellow-600 text-white px-3 py-1 rounded-full flex items-center gap-1.5 transition-colors disabled:opacity-50">
-                      <RefreshCw size={12} className={generatingDesc ? "animate-spin" : ""} /> {generatingDesc ? 'Mencari...' : 'Generate Wikipedia'}
+                      <RefreshCw size={12} className={generatingDesc ? "animate-spin" : ""} /> {generatingDesc ? 'Mencari...' : 'Generate AI ✨'}
                     </button>
                   </div>
                   <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
@@ -249,6 +251,15 @@ function TripTab({ token }: { token: string }) {
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Tanggal Kembali</label>
                   <input type="date" value={form.return_date} onChange={e => setForm({ ...form, return_date: e.target.value })}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Jenis Trip</label>
+                  <select value={form.trip_type} onChange={e => setForm({ ...form, trip_type: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white">
+                    <option value="">-- Pilih Jenis --</option>
+                    <option value="1D (ODT)">1D (ODT)</option>
+                    <option value="2D1N (Camp)">2D1N (Camp)</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Harga (IDR) *</label>

@@ -9,6 +9,7 @@ export interface Trip {
   id: number;
   mountain_name: string;
   via?: string;
+  trip_type?: string;
   description: string;
   difficulty: string;
   departure_date: string;
@@ -144,9 +145,16 @@ export default function TripCatalog() {
                     <div className="space-y-2.5 mb-5 text-gray-600 text-sm flex-1">
                       <div className="flex items-center gap-2.5">
                         <Calendar size={14} className="text-gray-400 flex-shrink-0" />
-                        <span>
-                          {formatDate(trip.departure_date)}
-                          {trip.return_date && ` — ${formatDate(trip.return_date)}`}
+                        <span className="flex items-center flex-wrap gap-2">
+                          <span>
+                            {formatDate(trip.departure_date)}
+                            {trip.return_date && ` — ${formatDate(trip.return_date)}`}
+                          </span>
+                          {trip.trip_type && (
+                            <span className="bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-md text-[10px] tracking-wider uppercase border border-orange-200">
+                              {trip.trip_type}
+                            </span>
+                          )}
                         </span>
                       </div>
                       <div className="flex items-center gap-2.5">
