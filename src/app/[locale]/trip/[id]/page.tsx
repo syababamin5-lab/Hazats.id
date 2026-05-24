@@ -321,6 +321,10 @@ export default function TripDetailPage() {
     ? (pkgs.find((p: any) => p.name === selectedPackage)?.price || pkgs[0].price)
     : trip.price;
 
+  const lowestPrice = pkgs.length > 0
+    ? Math.min(...pkgs.map((p: any) => p.price))
+    : trip.price;
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
@@ -382,7 +386,7 @@ export default function TripDetailPage() {
                 <div className="text-center mb-6 border-b border-gray-100 pb-6">
                   <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Start From</p>
                   <div className="text-3xl font-bold text-[#D4AF37]">
-                    {formatPrice(currentPrice)}
+                    {formatPrice(lowestPrice)}
                   </div>
                 </div>
 
