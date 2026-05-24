@@ -25,8 +25,14 @@ export default function BookingModal({ trip, onClose, formatPrice, formatDate }:
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const points = trip.meeting_point ? trip.meeting_point.split('|').filter(p => p.trim() !== '') : [];
+  const [selectedPoint, setSelectedPoint] = useState(points.length === 1 ? points[0] : '');
 
   const handleBook = async () => {
+    if (points.length > 0 && !selectedPoint) {
+      setError('Silakan pilih titik kumpul keberangkatan Anda.');
+      return;
+    }
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/login');
@@ -36,7 +42,7 @@ export default function BookingModal({ trip, onClose, formatPrice, formatDate }:
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${API_URL}/bookings?trip_id=${trip.id}`, {
+      const res = await fetch(`${API_URL}/bookings?trip_id=${trip.id}${selectedPoint ? `&meeting_point=${encodeURIComponent(selectedPoint)}` : ''}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -123,12 +129,23 @@ export default function BookingModal({ trip, onClose, formatPrice, formatDate }:
                   </div>
                 </div>
 
-                {trip.meeting_point && (
+                {points.length > 0 && (
                   <div className="flex items-start gap-3 p-3.5 bg-gray-50 rounded-xl">
                     <MapPin size={16} className="text-[#D4AF37] mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-gray-400 mb-0.5">{t('meeting_point')}</p>
-                      <p className="font-medium text-sm">{trip.meeting_point}</p>
+                    <div className="w-full">
+                      <p className="text-xs text-gray-400 mb-1.5">{t('meeting_point')}</p>
+                      {points.length === 1 ? (
+                        <p className="font-medium text-sm">{points[0]}</p>
+                      ) : (
+                        <div className="space-y-2 w-full pr-2">
+                          {points.map(p => (
+                            <label key={p} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedPoint === p ? 'border-[#D4AF37] bg-white shadow-sm' : 'border-gray-200 bg-white hover:border-[#D4AF37]'}`}>
+                              <input type="radio" name="meeting_point" value={p} checked={selectedPoint === p} onChange={() => setSelectedPoint(p)} className="w-4 h-4 text-[#D4AF37] focus:ring-[#D4AF37] border-gray-300" />
+                              <span className="text-sm font-medium">{p}</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

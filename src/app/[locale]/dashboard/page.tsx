@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { LogOut, Map, CreditCard, ChevronRight, Upload, CheckCircle, Calendar, Bus, AlertCircle, Download } from 'lucide-react';
+import { LogOut, Map, CreditCard, ChevronRight, Upload, CheckCircle, Calendar, Bus, AlertCircle, Download, MapPin } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`;
 
@@ -22,6 +22,7 @@ interface Booking {
   status: string;
   payment_proof_url: string | null;
   created_at: string;
+  meeting_point: string | null;
   trip: {
     id: number;
     mountain_name: string;
@@ -283,10 +284,16 @@ export default function DashboardPage() {
                           <Calendar size={11} />
                           {formatDate(booking.trip.departure_date)}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
                           <Bus size={11} />
                           {booking.trip.transport}
                         </div>
+                        {booking.meeting_point && (
+                          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
+                            <MapPin size={11} />
+                            {booking.meeting_point}
+                          </div>
+                        )}
 
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-[#D4AF37] text-sm">

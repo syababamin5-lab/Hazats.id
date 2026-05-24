@@ -230,11 +230,29 @@ function TripTab({ token }: { token: string }) {
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Titik Kumpul</label>
-                  <select value={form.meeting_point} onChange={e => setForm({ ...form, meeting_point: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white">
-                    <option value="">Pilih Titik Kumpul...</option>
-                    {meetingPoints.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
-                  </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                    {meetingPoints.map(m => {
+                      const isSelected = form.meeting_point?.split('|').includes(m.name);
+                      return (
+                        <label key={m.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                          <input type="checkbox" className="hidden" checked={isSelected}
+                            onChange={() => {
+                              const points = form.meeting_point ? form.meeting_point.split('|') : [];
+                              if (isSelected) {
+                                setForm({ ...form, meeting_point: points.filter(p => p !== m.name).join('|') });
+                              } else {
+                                setForm({ ...form, meeting_point: [...points, m.name].join('|') });
+                              }
+                            }}
+                          />
+                          <div className={`w-5 h-5 rounded flex items-center justify-center border ${isSelected ? 'bg-black border-black' : 'border-gray-300'}`}>
+                            {isSelected && <Check size={14} className="text-white" />}
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">{m.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Image URL + Gallery Picker */}
