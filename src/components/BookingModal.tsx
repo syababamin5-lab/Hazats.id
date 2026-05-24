@@ -134,18 +134,16 @@ export default function BookingModal({ trip, onClose, formatPrice, formatDate }:
                     <MapPin size={16} className="text-[#D4AF37] mt-0.5 flex-shrink-0" />
                     <div className="w-full">
                       <p className="text-xs text-gray-400 mb-1.5">{t('meeting_point')}</p>
-                      {points.length === 1 ? (
-                        <p className="font-medium text-sm">{points[0]}</p>
-                      ) : (
-                        <div className="space-y-2 w-full pr-2">
-                          {points.map(p => (
-                            <label key={p} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedPoint === p ? 'border-[#D4AF37] bg-white shadow-sm' : 'border-gray-200 bg-white hover:border-[#D4AF37]'}`}>
-                              <input type="radio" name="meeting_point" value={p} checked={selectedPoint === p} onChange={() => setSelectedPoint(p)} className="w-4 h-4 text-[#D4AF37] focus:ring-[#D4AF37] border-gray-300" />
-                              <span className="text-sm font-medium">{p}</span>
-                            </label>
-                          ))}
-                        </div>
-                      )}
+                      <select
+                        value={selectedPoint}
+                        onChange={(e) => setSelectedPoint(e.target.value)}
+                        className="w-full p-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] bg-white transition-all cursor-pointer"
+                      >
+                        {points.length > 1 && !selectedPoint && <option value="" disabled>Pilih Titik Kumpul</option>}
+                        {points.map(p => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 )}
