@@ -20,6 +20,7 @@ interface BookingDetail {
   id: number;
   status: string;
   payment_proof_url: string | null;
+  payment_proofs?: { id: number, file_url: string, amount: number, created_at: string }[];
   created_at: string;
   meeting_point: string | null;
   package_name: string | null;
@@ -55,6 +56,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const [loading, setLoading] = useState(true);
   
   const [uploading, setUploading] = useState(false);
+  const [uploadAmount, setUploadAmount] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -80,9 +82,15 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     const token = localStorage.getItem('token');
     if (!token || !booking) return;
 
+    if (uploadAmount <= 0) {
+      alert('Masukkan nominal pembayaran terlebih dahulu.');
+      return;
+    }
+
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('amount', uploadAmount.toString());
 
     try {
       const res = await fetch(`${API_URL}/bookings/${booking.id}/payment-proof`, {
@@ -92,7 +100,21 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       });
       if (res.ok) {
         const data = await res.json();
-        setBooking({ ...booking, payment_proof_url: data.payment_proof_url });
+        // Optimistic update
+        const newProof = {
+          id: data.id,
+          file_url: data.file_url,
+          amount: data.amount,
+          created_at: data.created_at
+        };
+        const updatedProofs = booking.payment_proofs ? [...booking.payment_proofs, newProof] : [newProof];
+        
+        setBooking({ 
+          ...booking, 
+          payment_proofs: updatedProofs,
+          payment_proof_url: booking.payment_proof_url || data.file_url 
+        });
+        setUploadAmount(0);
         alert('Bukti pembayaran berhasil diunggah.');
       } else {
         const errorData = await res.json().catch(() => ({}));
@@ -303,42 +325,87 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                   </div>
                 )}
 
-                <div className="pt-4">
-                  <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Biaya</span>
-                  <div className="text-3xl font-black text-[#D4AF37]">{formatPrice(finalPrice)}</div>
+                <div className="pt-4 border-t border-gray-100 space-y-2 mt-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Biaya</span>
+                    <span className="text-lg font-bold text-gray-900">{formatPrice(finalPrice)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Terbayar</span>
+                    <span className="text-lg font-bold text-emerald-600">
+                      {formatPrice(booking.payment_proofs?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Sisa Tagihan</span>
+                    <span className="text-2xl font-black text-[#D4AF37]">
+                      {formatPrice(Math.max(0, finalPrice - (booking.payment_proofs?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0)))}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Payment Proof Section */}
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm">
-              <h2 className="font-bold text-lg mb-4">Bukti Pembayaran</h2>
+              <h2 className="font-bold text-lg mb-4">Riwayat Pembayaran</h2>
               
-              {booking.payment_proof_url ? (
-                <div>
-                  <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl flex items-start gap-3 mb-4">
-                    <CheckCircle className="shrink-0 mt-0.5" size={18} />
-                    <div>
-                      <p className="font-bold text-sm mb-0.5">Bukti Telah Diunggah</p>
-                      <p className="text-xs opacity-90">Kami sedang melakukan verifikasi.</p>
+              {/* List of Proofs */}
+              <div className="space-y-3 mb-6">
+                {booking.payment_proofs && booking.payment_proofs.length > 0 ? (
+                  booking.payment_proofs.map((proof, idx) => (
+                    <div key={proof.id || idx} className="bg-gray-50 p-4 rounded-xl flex items-center justify-between gap-3 border border-gray-100">
+                      <div>
+                        <p className="font-bold text-sm text-gray-900">{formatPrice(proof.amount)}</p>
+                        <p className="text-xs text-gray-500">{new Date(proof.created_at).toLocaleString('id-ID')}</p>
+                      </div>
+                      <a 
+                        href={`${BACKEND_URL}${proof.file_url}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="flex items-center gap-2 text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                      >
+                        <FileText size={14} /> Lihat
+                      </a>
                     </div>
+                  ))
+                ) : booking.payment_proof_url ? (
+                  <div className="bg-gray-50 p-4 rounded-xl flex items-center justify-between gap-3 border border-gray-100">
+                    <div>
+                      <p className="font-bold text-sm text-gray-900">Pembayaran Awal</p>
+                      <p className="text-xs text-gray-500">Bukti lama tanpa nominal</p>
+                    </div>
+                    <a 
+                      href={`${BACKEND_URL}${booking.payment_proof_url}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="flex items-center gap-2 text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                    >
+                      <FileText size={14} /> Lihat
+                    </a>
                   </div>
-                  <a 
-                    href={`${BACKEND_URL}${booking.payment_proof_url}`} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex items-center justify-center gap-2 w-full border-2 border-gray-200 hover:border-black text-black font-semibold py-2.5 rounded-xl transition-colors text-sm"
-                  >
-                    <FileText size={16} /> Lihat Lampiran
-                  </a>
-                </div>
-              ) : (
-                <div>
-                  <div className="bg-amber-50 text-amber-700 p-4 rounded-xl flex items-start gap-3 mb-5">
-                    <AlertCircle className="shrink-0 mt-0.5" size={18} />
-                    <p className="text-xs font-medium leading-relaxed">Harap unggah bukti transfer agar pendaftaran Anda dapat diverifikasi oleh admin.</p>
+                ) : (
+                  <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <AlertCircle className="mx-auto text-gray-400 mb-2" size={24} />
+                    <p className="text-xs text-gray-500">Belum ada pembayaran.</p>
                   </div>
-                  
+                )}
+              </div>
+              
+              <div className="border-t border-gray-100 pt-6">
+                <h3 className="font-bold text-sm mb-3">Tambah Pembayaran (Cicilan)</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1">Nominal Pembayaran (Rp)</label>
+                    <input 
+                      type="number"
+                      value={uploadAmount || ''}
+                      onChange={e => setUploadAmount(Number(e.target.value))}
+                      placeholder="Contoh: 500000"
+                      className="w-full border-gray-200 rounded-xl focus:border-black focus:ring-black text-sm p-3 border"
+                    />
+                  </div>
+
                   <input
                     type="file"
                     accept="image/*"
@@ -351,20 +418,26 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                   />
                   
                   <button
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => {
+                      if (uploadAmount <= 0) {
+                        alert('Silakan masukkan nominal pembayaran terlebih dahulu.');
+                        return;
+                      }
+                      fileInputRef.current?.click();
+                    }}
                     disabled={uploading}
-                    className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm"
                   >
                     {uploading ? (
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     ) : (
                       <>
-                        <Upload size={18} /> Unggah Bukti Transfer
+                        <Upload size={16} /> Pilih Foto & Unggah
                       </>
                     )}
                   </button>
                 </div>
-              )}
+              </div>
             </div>
 
           </div>

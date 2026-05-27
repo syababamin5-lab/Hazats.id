@@ -9,8 +9,7 @@ import {
   RefreshCw, AlertCircle, Settings, UserCheck
 } from 'lucide-react';
 
-import { API_URL } from '@/lib/api';
-
+import { API_URL, BACKEND_URL } from '@/lib/api';
 
 // ─── Types ──────────────────────────────────────────────────────────────
 interface Trip {
@@ -22,6 +21,7 @@ interface BookingUser { name: string; pendaki_id: string; email: string; phone: 
 interface BookingTrip { id: number; mountain_name: string; departure_date: string; price: number; }
 interface Booking {
   id: number; status: string; payment_proof_url: string | null;
+  payment_proofs?: { id: number, file_url: string, amount: number, created_at: string }[];
   created_at: string; user: BookingUser; trip: BookingTrip;
 }
 interface Member {
@@ -578,10 +578,19 @@ function BookingTab({ token }: { token: string }) {
 
                 <div className="flex flex-col items-end gap-2">
                   {/* Bukti Bayar */}
-                  {b.payment_proof_url ? (
-                    <a href={`${API_URL}${b.payment_proof_url}`} target="_blank" rel="noopener noreferrer"
+                  {b.payment_proofs && b.payment_proofs.length > 0 ? (
+                    <div className="flex flex-col gap-1.5 items-end">
+                      {b.payment_proofs.map((p, idx) => (
+                        <a key={p.id} href={`${BACKEND_URL}${p.file_url}`} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-full font-medium transition-colors">
+                          <Eye size={12} /> {formatPrice(p.amount)}
+                        </a>
+                      ))}
+                    </div>
+                  ) : b.payment_proof_url ? (
+                    <a href={`${BACKEND_URL}${b.payment_proof_url}`} target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-1.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-full font-medium transition-colors">
-                      <Eye size={12} /> Lihat Bukti Bayar
+                      <Eye size={12} /> Bukti Lama
                     </a>
                   ) : (
                     <span className="text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full">Belum ada bukti</span>
